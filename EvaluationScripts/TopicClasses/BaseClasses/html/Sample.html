@@ -1,0 +1,509 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Sample</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-05-20"><meta name="DC.source" content="Sample.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Constructor</a></li><li><a href="#3">Verification of data type</a></li><li><a href="#4">Preprocessing callback function</a></li><li><a href="#5">Duplicate to create a sample instance in a specific time interval</a></li><li><a href="#6">Plot Single Merge</a></li><li><a href="#7">Plot Single</a></li><li><a href="#8">Plot Single Subplots</a></li><li><a href="#9">Declare the specific data axes</a></li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> Sample &lt; handle &amp; matlab.mixin.Copyable
+    <span class="keyword">properties</span>
+        topic
+        data
+        saveFigurePath
+        fs
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+</pre><h2 id="2">Constructor</h2><p>Assign the samples with topicname, sample values (timestamp, data), and the sampling frequency.</p><pre class="codeinput">        <span class="keyword">function</span> obj = Sample(topicName, sampleTable, fs)
+            obj.topic = topicName;
+            obj.fs = fs;
+
+            fNames = fieldnames(sampleTable);
+            <span class="keyword">for</span> i = 1: numel(fNames)
+                obj.data.(fNames{i}) = sampleTable.(fNames{i});
+            <span class="keyword">end</span>
+
+            <span class="comment">% Perform some preprocessing if necessary</span>
+            <span class="comment">% For example: adding total acceleration/velocity/... into the handle</span>
+            obj.preprocess_data()
+
+            <span class="comment">% Check if the sample is succesfully constructed</span>
+            isValid = obj.check_data_format();
+            assert(isValid, sprintf(<span class="string">"Data Format of topic %s is invalid."</span>, topicName));
+
+        <span class="keyword">end</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in Sample (line 14)
+            obj.topic = topicName;
+</pre><h2 id="3">Verification of data type</h2><p>Child class must declare the specific data types it contains to avoid error during the analysis</p><pre class="codeinput">        <span class="keyword">function</span> isValid = check_data_format(obj)
+            isValid = false;
+        <span class="keyword">end</span>
+</pre><h2 id="4">Preprocessing callback function</h2><p>The callback function called in the constructor. Child class can overload this function to perform some desired actions, e.g., axis alligment, mean value computation, add total velocity, etc.</p><pre class="codeinput">        <span class="keyword">function</span> preprocess_data(obj)
+           <span class="keyword">if</span>(isfield(obj.data, <span class="string">"Time"</span>))
+              obj.data.Time = obj.data.Time/ 1e6; <span class="comment">% Convert us to s</span>
+           <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2 id="5">Duplicate to create a sample instance in a specific time interval</h2><p>Sometimes the analysis required a specific data segments. This function make a copy of the object and return all the feature values in the given time interval.</p><pre class="codeinput">        <span class="keyword">function</span> copySegment = get_data_segments(obj, tS, tE)
+            copySegment = copy(obj);
+            fNames = fieldnames(obj.data);
+            <span class="keyword">for</span> i = 1: numel(fNames)
+                <span class="keyword">try</span>
+                    copySegment.data.(fNames{i}) = obj.data.(fNames{i})((obj.data.Time &lt; tE) &amp; (obj.data.Time &gt; tS));
+                <span class="keyword">catch</span>
+                    <span class="keyword">continue</span>
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2 id="6">Plot Single Merge</h2><p>Plot all data values in one figure</p><pre class="codeinput">        <span class="keyword">function</span> [retFig, name] = plot_time_domain_single_figure_merge(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            name = sprintf(<span class="string">"Time_series_%s_%s_%s"</span>, obj.topic, string(param.tMin), string(param.tMax));
+            [structInfo] = obj.get_analyzed_fieldname();
+
+            <span class="comment">% Plotting</span>
+            retFig = figure(<span class="string">"Name"</span>, name);
+            tFilter = (obj.data.Time &gt;= param.tMin) &amp; (obj.data.Time &lt; param.tMax);
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+                line = plot(obj.data.Time(tFilter), obj.data.(structInfo.fName(i))(tFilter), <span class="string">'-o'</span>, <span class="string">"DisplayName"</span>, structInfo.fName(i));
+                hold <span class="string">on</span>;
+            <span class="keyword">end</span>
+
+            title(obj.topic, <span class="string">'Interpreter'</span>,<span class="string">'None'</span>,  <span class="string">'FontSize'</span>,25);
+            ylabel(sprintf(<span class="string">"%s [%s]"</span>, structInfo.datatype, structInfo.unit));
+            xlabel(<span class="string">"Time [s]"</span>);
+            FormatFigure(gcf, 12, 12/8, <span class="string">'MarkerSize'</span>, 2.5);
+            legend;
+            <span class="keyword">if</span>(isstring(param.SavePath))
+                savePath = fullfile(param.SavePath, sprintf(<span class="string">"%s"</span>, obj.topic));
+                obj.save_figure(retFig, savePath, name);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2 id="7">Plot Single</h2><p>Plot each data axis in a new figure</p><pre class="codeinput">        <span class="keyword">function</span> [retFig, name] = plot_time_domain_single_figure(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            name = sprintf(<span class="string">"Time_series_3_axes_%s_%s_%s"</span>, obj.topic, string(param.tMin), string(param.tMax));
+            [structInfo] = obj.get_analyzed_fieldname();
+
+            <span class="comment">% Plotting</span>
+            retFig = figure(<span class="string">"Name"</span>, name);
+            tFilter = (obj.data.Time &gt;= param.tMin) &amp; (obj.data.Time &lt; param.tMax);
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+                ax(i) = subplot(numel(structInfo.fName), 1, i);
+                line = plot(obj.data.Time(tFilter), obj.data.(structInfo.fName(i))(tFilter), <span class="string">'-o'</span>, <span class="string">"DisplayName"</span>, structInfo.fName(i));
+                hold <span class="string">on</span>;
+                ylabel(sprintf(<span class="string">"%s [%s]"</span>, structInfo.interpreterName(i), structInfo.unit));
+            <span class="keyword">end</span>
+
+            sgtitle(obj.topic, <span class="string">'Interpreter'</span>,<span class="string">'None'</span>,  <span class="string">'FontSize'</span>,25);
+
+            xlabel(<span class="string">"Time [s]"</span>);
+            linkaxes(ax, <span class="string">"x"</span>);
+            FormatFigure(gcf, 12, 12/8, <span class="string">'MarkerSize'</span>, 2.5);
+
+            <span class="keyword">if</span>(isstring(param.SavePath))
+                savePath = fullfile(param.SavePath, sprintf(<span class="string">"%s"</span>, obj.topic));
+                obj.save_figure(retFig, savePath, name);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2 id="8">Plot Single Subplots</h2><p>Plot each data axis in a subplot of one figure</p><pre class="codeinput">        <span class="keyword">function</span> [retFig, name] = plot_time_domain_multi_figure(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            [structInfo] = obj.get_analyzed_fieldname();
+            <span class="comment">% Plotting</span>
+            tFileter = (obj.data.Time &gt;= param.tMin) &amp; (obj.data.Time &lt; param.tMax);
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+                name = sprintf(<span class="string">"Time_series_3_axes_%s_%s_%s_%s"</span>, obj.topic, string(param.tMin), string(param.tMax),  structInfo.fName(i));
+                retFig = figure(<span class="string">"Name"</span>, name);
+                line = plot(obj.data.Time(tFileter), obj.data.(structInfo.fName(i))(tFileter), <span class="string">'-o'</span>, <span class="string">"DisplayName"</span>, structInfo.fName(i));
+                hold <span class="string">on</span>;
+                ylabel(sprintf(<span class="string">"%s [%s]"</span>, structInfo.interpreterName(i), structInfo.unit));
+
+
+                title(obj.topic, <span class="string">'Interpreter'</span>,<span class="string">'None'</span>,  <span class="string">'FontSize'</span>,25);
+                xlabel(<span class="string">"Time [s]"</span>);
+                <span class="comment">%linkaxes(ax, "x");</span>
+                FormatFigure(gcf, 12, 12/8, <span class="string">'MarkerSize'</span>, 2.5);
+                <span class="keyword">if</span>(isstring(param.SavePath))
+                    savePath = fullfile(param.SavePath, sprintf(<span class="string">"%s"</span>, obj.topic));
+                    obj.save_figure(retFig, savePath, name);
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">% Use this function to generate and save multiple figures in a</span>
+        <span class="comment">% folder. % TODO: bring this class to TopicVisualizable or something</span>
+        <span class="keyword">function</span> quick_plot_time_domain()
+           error <span class="string">"Not</span> <span class="string">defined"</span>;
+        <span class="keyword">end</span>
+</pre><h2 id="9">Declare the specific data axes</h2><pre>       function dataStruct = get_data_cross_analyzed(obj)
+           error "NotImplemented"
+       end</pre><pre class="codeinput">        <span class="keyword">function</span> dataStruct = get_data_cross_analyzed(obj, varargin)
+            param = ParameterParser.parse(varargin{:});
+            dataStruct = copy(obj);
+            [structInfo] = dataStruct.get_analyzed_fieldname();
+            filter = (dataStruct.data.Time &gt; param.tMin) &amp; (dataStruct.data.Time &lt; param.tMax);
+            dataStruct.data.Time = dataStruct.data.Time(filter);
+            <span class="comment">% Take the sample segment</span>
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+                dataStruct.data.(structInfo.fName(i)) = obj.data.(structInfo.fName(i))(filter);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> dataStruct = get_data_components(obj)
+            error <span class="string">"NotImplemented"</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [fName, unit, interpreterName] = get_analyzed_fieldname(obj)
+            error <span class="string">"NotImplemented"</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> out = lp_filter(obj, fPtr, fc)
+            out = copy(obj);
+            [structInfo] = obj.get_analyzed_fieldname();
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+               out.data.(structInfo.fName{i}) = fPtr.lp_filter(out.data.(structInfo.fName{i}), fc, obj.fs);
+            <span class="keyword">end</span>
+            out.topic = sprintf(<span class="string">"%s_Post_Filterred"</span>, obj.topic);
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [f, X] = fft_analyze(obj, varargin)
+            pOption = ParameterParser.parse(varargin{:});
+            fs = obj.fs; <span class="comment">% In case we want to try with different frequency from the parser?</span>
+
+            <span class="comment">% TODO: implement a class to analyze the FFT with some special</span>
+            <span class="comment">% function instead of directly implemented here</span>
+            structInfo = obj.get_analyzed_fieldname();
+
+            figName =  sprintf(<span class="string">"FFT_%s_[%d_s_%d_s]"</span>, obj.topic, round(pOption.tMin), round(pOption.tMax));
+            timeFilter = (obj.data.Time &gt;= pOption.tMin) &amp; (obj.data.Time &lt;= pOption.tMax);
+            <span class="keyword">for</span> i = 1:numel(structInfo.fName)
+                orgDataVec = obj.data.(structInfo.fName{i});
+                x = detrend(orgDataVec(timeFilter)); <span class="comment">% .* hanning(numel(orgDataVec(timeFilter)));</span>
+                [f, X] = perform_FFT(x, fs);
+
+                figure_name = sprintf(<span class="string">"%s_%s"</span>, figName, structInfo.fName(i));
+                fig = figure(<span class="string">'Name'</span>, figure_name, <span class="string">'Position'</span>, get(0, <span class="string">'Screensize'</span>));
+                plot(f, X, <span class="string">'-o'</span>);
+                hold <span class="string">on</span>;
+                FormatFigure(gcf, 12, 12/8, <span class="string">'MarkerSize'</span>, 3);
+
+                xlabel(<span class="string">"Freq [Hz]"</span>);
+                ylabel(sprintf(<span class="string">"Magnitude %s"</span>, lower(structInfo.interpreterName(i))));
+                title(sprintf(<span class="string">"FFT of %s \n [%.1f, %.1f] [s] "</span>, obj.topic, pOption.tMin, pOption.tMax), <span class="string">'Interpreter'</span>, <span class="string">'None'</span>)
+
+                pbaspect([4 3 4]) <span class="comment">% TODO: bring this out as parameter</span>
+
+                <span class="keyword">if</span>(isstring(pOption.SavePath))
+                    savePath = fullfile(pOption.SavePath, <span class="string">"FFT"</span>, figName);
+                    obj.save_figure(fig, savePath, figure_name);
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> save_figure(obj, retFig, savePath, figName)
+            save_figure(retFig, savePath, figName)
+        <span class="keyword">end</span>
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef Sample < handle & matlab.mixin.Copyable
+    properties
+        topic
+        data
+        saveFigurePath
+        fs
+    end
+    
+    methods    
+        %% Constructor
+        % Assign the samples with topicname, sample values (timestamp,
+        % data), and the sampling frequency.
+        function obj = Sample(topicName, sampleTable, fs)
+            obj.topic = topicName;
+            obj.fs = fs;
+            
+            fNames = fieldnames(sampleTable);
+            for i = 1: numel(fNames)
+                obj.data.(fNames{i}) = sampleTable.(fNames{i});
+            end
+            
+            % Perform some preprocessing if necessary
+            % For example: adding total acceleration/velocity/... into the handle
+            obj.preprocess_data()
+            
+            % Check if the sample is succesfully constructed
+            isValid = obj.check_data_format();
+            assert(isValid, sprintf("Data Format of topic %s is invalid.", topicName));
+            
+        end
+    
+        %% Verification of data type
+        % Child class must declare the specific data types it contains to
+        % avoid error during the analysis
+        function isValid = check_data_format(obj)
+            isValid = false;
+        end
+        
+        
+        %% Preprocessing callback function
+        % The callback function called in the constructor. Child class can
+        % overload this function to perform some desired actions, e.g.,
+        % axis alligment, mean value computation, add total velocity, etc. 
+        function preprocess_data(obj)
+           if(isfield(obj.data, "Time"))
+              obj.data.Time = obj.data.Time/ 1e6; % Convert us to s 
+           end
+        end
+           
+        %% Duplicate to create a sample instance in a specific time interval
+        % Sometimes the analysis required a specific data segments. This
+        % function make a copy of the object and return all the feature
+        % values in the given time interval.
+        function copySegment = get_data_segments(obj, tS, tE)
+            copySegment = copy(obj);
+            fNames = fieldnames(obj.data);
+            for i = 1: numel(fNames)
+                try
+                    copySegment.data.(fNames{i}) = obj.data.(fNames{i})((obj.data.Time < tE) & (obj.data.Time > tS));
+                catch
+                    continue
+                end
+            end
+        end
+        
+        %% Plot Single Merge
+        % Plot all data values in one figure
+        function [retFig, name] = plot_time_domain_single_figure_merge(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            name = sprintf("Time_series_%s_%s_%s", obj.topic, string(param.tMin), string(param.tMax));
+            [structInfo] = obj.get_analyzed_fieldname();
+            
+            % Plotting            
+            retFig = figure("Name", name);
+            tFilter = (obj.data.Time >= param.tMin) & (obj.data.Time < param.tMax);
+            for i = 1:numel(structInfo.fName)
+                line = plot(obj.data.Time(tFilter), obj.data.(structInfo.fName(i))(tFilter), '-o', "DisplayName", structInfo.fName(i));
+                hold on;
+            end
+            
+            title(obj.topic, 'Interpreter','None',  'FontSize',25);
+            ylabel(sprintf("%s [%s]", structInfo.datatype, structInfo.unit));
+            xlabel("Time [s]");
+            FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+            legend;
+            if(isstring(param.SavePath))
+                savePath = fullfile(param.SavePath, sprintf("%s", obj.topic));
+                obj.save_figure(retFig, savePath, name);
+            end
+        end
+        
+        %% Plot Single
+        % Plot each data axis in a new figure
+        function [retFig, name] = plot_time_domain_single_figure(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            name = sprintf("Time_series_3_axes_%s_%s_%s", obj.topic, string(param.tMin), string(param.tMax));
+            [structInfo] = obj.get_analyzed_fieldname();
+            
+            % Plotting            
+            retFig = figure("Name", name);
+            tFilter = (obj.data.Time >= param.tMin) & (obj.data.Time < param.tMax);
+            for i = 1:numel(structInfo.fName)
+                ax(i) = subplot(numel(structInfo.fName), 1, i);
+                line = plot(obj.data.Time(tFilter), obj.data.(structInfo.fName(i))(tFilter), '-o', "DisplayName", structInfo.fName(i));
+                hold on;
+                ylabel(sprintf("%s [%s]", structInfo.interpreterName(i), structInfo.unit));
+            end
+            
+            sgtitle(obj.topic, 'Interpreter','None',  'FontSize',25);
+
+            xlabel("Time [s]");
+            linkaxes(ax, "x");           
+            FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+            
+            if(isstring(param.SavePath))
+                savePath = fullfile(param.SavePath, sprintf("%s", obj.topic));
+                obj.save_figure(retFig, savePath, name);
+            end
+        end
+        
+        %% Plot Single Subplots
+        % Plot each data axis in a subplot of one figure
+        function [retFig, name] = plot_time_domain_multi_figure(obj, varargin)
+            [param] = ParameterParser.parse(varargin{:});
+            [structInfo] = obj.get_analyzed_fieldname();
+            % Plotting            
+            tFileter = (obj.data.Time >= param.tMin) & (obj.data.Time < param.tMax);
+            for i = 1:numel(structInfo.fName)
+                name = sprintf("Time_series_3_axes_%s_%s_%s_%s", obj.topic, string(param.tMin), string(param.tMax),  structInfo.fName(i));
+                retFig = figure("Name", name);
+                line = plot(obj.data.Time(tFileter), obj.data.(structInfo.fName(i))(tFileter), '-o', "DisplayName", structInfo.fName(i));
+                hold on;
+                ylabel(sprintf("%s [%s]", structInfo.interpreterName(i), structInfo.unit));
+                
+                
+                title(obj.topic, 'Interpreter','None',  'FontSize',25);                
+                xlabel("Time [s]");
+                %linkaxes(ax, "x");           
+                FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+                if(isstring(param.SavePath))
+                    savePath = fullfile(param.SavePath, sprintf("%s", obj.topic));
+                    obj.save_figure(retFig, savePath, name);
+                end
+            end
+        end
+        
+        % Use this function to generate and save multiple figures in a
+        % folder. % TODO: bring this class to TopicVisualizable or something
+        function quick_plot_time_domain()
+           error "Not defined"; 
+        end
+        
+        
+        %% Declare the specific data axes
+%         function dataStruct = get_data_cross_analyzed(obj)
+%             error "NotImplemented"
+%         end
+        
+        function dataStruct = get_data_cross_analyzed(obj, varargin)
+            param = ParameterParser.parse(varargin{:});
+            dataStruct = copy(obj);
+            [structInfo] = dataStruct.get_analyzed_fieldname();
+            filter = (dataStruct.data.Time > param.tMin) & (dataStruct.data.Time < param.tMax);
+            dataStruct.data.Time = dataStruct.data.Time(filter);
+            % Take the sample segment
+            for i = 1:numel(structInfo.fName)
+                dataStruct.data.(structInfo.fName(i)) = obj.data.(structInfo.fName(i))(filter);
+            end
+        end
+        
+        function dataStruct = get_data_components(obj)
+            error "NotImplemented"
+        end
+        
+        function [fName, unit, interpreterName] = get_analyzed_fieldname(obj)
+            error "NotImplemented"
+        end
+        
+        function out = lp_filter(obj, fPtr, fc)
+            out = copy(obj);
+            [structInfo] = obj.get_analyzed_fieldname();
+            for i = 1:numel(structInfo.fName)
+               out.data.(structInfo.fName{i}) = fPtr.lp_filter(out.data.(structInfo.fName{i}), fc, obj.fs); 
+            end
+            out.topic = sprintf("%s_Post_Filterred", obj.topic);
+        end
+        
+        function [f, X] = fft_analyze(obj, varargin)
+            pOption = ParameterParser.parse(varargin{:});
+            fs = obj.fs; % In case we want to try with different frequency from the parser?
+            
+            % TODO: implement a class to analyze the FFT with some special
+            % function instead of directly implemented here
+            structInfo = obj.get_analyzed_fieldname();
+            
+            figName =  sprintf("FFT_%s_[%d_s_%d_s]", obj.topic, round(pOption.tMin), round(pOption.tMax));
+            timeFilter = (obj.data.Time >= pOption.tMin) & (obj.data.Time <= pOption.tMax);
+            for i = 1:numel(structInfo.fName)
+                orgDataVec = obj.data.(structInfo.fName{i});
+                x = detrend(orgDataVec(timeFilter)); % .* hanning(numel(orgDataVec(timeFilter)));
+                [f, X] = perform_FFT(x, fs);
+                
+                figure_name = sprintf("%s_%s", figName, structInfo.fName(i));
+                fig = figure('Name', figure_name, 'Position', get(0, 'Screensize'));
+                plot(f, X, '-o');
+                hold on; 
+                FormatFigure(gcf, 12, 12/8, 'MarkerSize', 3);
+
+                xlabel("Freq [Hz]");
+                ylabel(sprintf("Magnitude %s", lower(structInfo.interpreterName(i))));
+                title(sprintf("FFT of %s \n [%.1f, %.1f] [s] ", obj.topic, pOption.tMin, pOption.tMax), 'Interpreter', 'None')
+                
+                pbaspect([4 3 4]) % TODO: bring this out as parameter
+
+                if(isstring(pOption.SavePath))
+                    savePath = fullfile(pOption.SavePath, "FFT", figName);
+                    obj.save_figure(fig, savePath, figure_name);
+                end
+            end       
+        end
+        
+        function save_figure(obj, retFig, savePath, figName)
+            save_figure(retFig, savePath, figName)
+        end
+        
+        
+    end
+end
+
+
+
+
+
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,1 @@
+func = trans_func();
