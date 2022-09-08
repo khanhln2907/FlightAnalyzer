@@ -36,9 +36,9 @@ def validate_log_file(flightLogPath = None):
     ret =  ParsedPath()
 
     if(flightLogPath is None):
-        logflightLogPathPath = askopenfilename()
+        flightLogPath = askopenfilename()
 
-
+    print("Processing log file ", flightLogPath)
 
     fileSubFolder = os.path.dirname(flightLogPath)
     fileName = os.path.splitext(os.path.basename(flightLogPath))[0]
@@ -48,8 +48,8 @@ def validate_log_file(flightLogPath = None):
     if(not os.path.isdir(processedFolder)):
         print("Creating new folder ...", processedFolder)
         os.mkdir(processedFolder)
-
         os.chmod(processedFolder, 0o777)
+
         orgFilePath = os.path.join(os.getcwd(), fileSubFolder, fileName + ".TXT")
         verifiedFilePath = os.path.join(os.getcwd(), processedFolder, fileName + "_verified.TXT")
         ignoredFilePath = os.path.join(os.getcwd(), processedFolder, fileName + "_ignored.TXT")
@@ -72,7 +72,7 @@ def validate_log_file(flightLogPath = None):
         
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        print("Start parsing at", current_time)
+        print("Start validating file at", current_time)
 
 
         for line in lines: 
@@ -113,7 +113,9 @@ def validate_log_file(flightLogPath = None):
 
     else:
         print(processedFolder, "Folder exists. Abort parsing...")
+        return None
 
+        
     return ret
 
 if __name__ == "__main__":

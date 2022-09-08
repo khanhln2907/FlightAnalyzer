@@ -1,11 +1,11 @@
-handle = load(fullfile(pwd,'\FlightLogs\2022-09-07\KC3\Parsed_LOG00002.mat'));
-dataFrameKC.dataTable = handle.dataTable;
+dataFrameKC.dataTable = dataTable;
 
 
 frameKC.accSample =  AccelerationSample("K4_VN200_Acceleration", dataFrameKC.dataTable.ACCELERATION, 800);
 frameKC.rateSample =  AttitudeRateSample("K4_VN200_Rate", dataFrameKC.dataTable.ATTITUDE_RATE, 800);
 frameKC.rateFilterredSample =  AttitudeRateSample("K4_VN200_Rate_Filterred", dataFrameKC.dataTable.FILTERED_ATTITUDE_RATE, 800);
 frameKC.velSample =  VelocitySample("K4_VN200_Velocity", dataFrameKC.dataTable.VELOCITY_NED, 1);
+calcHomedirection = dataFrameKC.dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
 
 trajSample = TrajectorySample("GPSPositionSample", dataFrameKC.dataTable.POSITION, ...
                               "VelNEDSample" , dataFrameKC.dataTable.VELOCITY_NED, ...

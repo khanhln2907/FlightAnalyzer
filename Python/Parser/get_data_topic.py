@@ -1,6 +1,8 @@
 from importlib.resources import path
 import json
+import sys
 import os
+sys.path.append(os.getcwd())
 from tkinter.filedialog import askopenfilename, askdirectory
 import re
 import numpy as np
@@ -9,7 +11,13 @@ import pandas as pd
 
 from Python.Parser.get_data_format import get_format_dict
 
-def get_data_topic(filePath, format, key):
+def get_data_topic(filePath, format, key, saveCSVFolderPath = None):
+    # Declare CSV path to be logged  
+    if saveCSVFolderPath is not None:
+        if(not os.path.isdir(saveCSVFolderPath)):
+            os.mkdir(saveCSVFolderPath)    
+        os.chmod(saveCSVFolderPath, 0o777)
+
     print("Getting data topic", key, "from file", filePath)
     print("Parsing topic ", format["Name"])
     print("Data format ", format["Data"])
@@ -32,20 +40,19 @@ def get_data_topic(filePath, format, key):
                 i += 1
 
     df = pd.DataFrame(dataArr[0:i, :], columns=format["Data"])
+
+    # Save to CSV to be conveniently loaded some where else    
+    if saveCSVFolderPath is not None:
+        df.to_csv(os.path.join(saveCSVFolderPath, format["Name"] + ".csv"), index = False)
+
     return df, format["Name"]
 
-def parse_all_data_topic(cleanedFilePath, processedDirPath, formatList, declaredTopicID, saveCSVFolderPath = None):
-    if saveCSVFolderPath is not None:
-        if(not os.path.isdir(saveCSVFolderPath)):
-            os.mkdir(saveCSVFolderPath)
-
-    # TODO: maybe add some try catch here in case some line is corrupt
+def parse_all_data_topic(cleanedFilePath, formatList, declaredTopicID, saveCSVFolderPath = None):
+    
     for i in range(len(formatList)):
-        df, name = get_data_topic(cleanedFilePath, formatList[i], declaredTopicID[i])
+        df, name = get_data_topic(cleanedFilePath, formatList[i], declaredTopicID[i], saveCSVFolderPath)
 
-        # Save to CSV to be conveniently loaded some where else    
-        if saveCSVFolderPath is not None:
-            df.to_csv(saveCSVFolderPath, index = False)
+        
 
 if __name__ == "__main__":
   
@@ -66,4 +73,4 @@ if __name__ == "__main__":
     # df.to_csv(processedTopicPath, index = False)
 
     # Parse all
-    parse_all_data_topic(cleanedFilePath, processedDirPath, formatList, saveCSVFolderPath = os.path.join(processedDirPath, "CSV"))
+    parse_all_data_topic(cleanedFilePath, formatList, declaredTopicID, saveCSVFolderPath = os.path.join(processedDirPath, "CSV"))
