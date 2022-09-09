@@ -231,13 +231,22 @@ classdef TrajectorySample < handle
                 vZ(2) = -1 * interp1(obj.velNEDSample.Time, obj.velNEDSample.VelDown, t) * Scale + Z0;
             end
 
-            function h = plot_flight_mode(obj, ax)
+            function h = plot_flight_mode(obj, ax, tInterval)
                 if ~exist('ax', 'Var')
                     h.FigTrajectory = figure('Name', 'Intercept');
                     h.ax = axes();
+                    ax = h.ax;
+                else
+                    yyaxis right;
                 end
                 
-                h = plot(h.ax, obj.modeSample.Time / 1e6, obj.modeSample.FlightMode, "-o");
+                if ~exist('tInterval', 'Var')
+                    tInterval = [-inf inf];
+                end
+                
+                mode = get_topic_sample_interval(obj.modeSample, tInterval(1), tInterval(2));
+                
+                h = plot(ax, mode.Time / 1e6, mode.FlightMode, "-o", "DisplayName", "FlightMode");
                 xlabel("Time [s]");
                 
                 if ~exist('ax', 'Var')

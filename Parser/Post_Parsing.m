@@ -63,6 +63,15 @@ function [dataTable] = Post_Parsing(dataTable)
         dataTable.FCON_SP_ALL = SPTable;
     end
     
+    if(isfield(dataTable, 'PID_INTERNAL_STATE'))
+        dataTable.PID_CONTROLLER.pPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 1, :);
+        dataTable.PID_CONTROLLER.qPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 2, :);
+        dataTable.PID_CONTROLLER.rPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 3, :);
+        dataTable.PID_CONTROLLER.phiPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 4, :);
+        dataTable.PID_CONTROLLER.thetaPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 5, :);
+        dataTable.PID_CONTROLLER.psiPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 6, :);
+    end
+    
     %% Extract flight mode from controller setpoint priorities
         cats = categorical({'IDLE', 'RATE', 'ATTITUDE', 'VEL_MAN', 'VEL_AUTO', 'TERRAIN', 'POS', 'DIR'});
         
@@ -113,6 +122,7 @@ function [dataTable] = Post_Parsing(dataTable)
         fprintf("Error Post Parsing: %s", ME.message);
     end
         
+    
     %% Overwrite the parsed file with new data added
     if(uiSelected)
         dataTable.evaluation.FilePath = fullfile(path, file);

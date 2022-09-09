@@ -54,7 +54,7 @@ classdef CrossAnalyzerBase
             end
         end
         
-        function retFig = plot_time_domain_multi_figure(obj, varargin)    
+        function axisHandle = plot_time_domain_multi_figure(obj, varargin)    
             param = ParameterParser.parse(varargin{:});
             dataHandle = cell(obj.nTopic, 1);
             figName = sprintf("Cross_Evaluation_[%ds_%ds]_", round(param.tMin), round(param.tMax));
@@ -66,7 +66,7 @@ classdef CrossAnalyzerBase
             for i = 1:numel(obj.structInfo.fName)
                 retFig = figure("Name", figName);
                 for topic = 1:obj.nTopic
-                    line = plot(dataHandle{topic}.data.Time, dataHandle{topic}.data.(obj.structInfo.fName(i)), '-o', "DisplayName", dataHandle{topic}.topic);
+                    axisHandle{i} = plot(dataHandle{topic}.data.Time, dataHandle{topic}.data.(obj.structInfo.fName(i)), '-o', "DisplayName", dataHandle{topic}.topic);
                     hold on;
                 end
                 xlabel("Time [s]");

@@ -1,6 +1,6 @@
 % Get the path
-out = get_datatable_multiple_drones();
-
+%out = get_datatable_multiple_drones();
+out = get_datatable_single();
 
 function [out] = get_datatable_multiple_drones(parentFolder)
     if(~exist('parentFolder', 'Var'))

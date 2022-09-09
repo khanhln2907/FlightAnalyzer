@@ -19,10 +19,6 @@ frameKC.gimbalEncSample = AttitudeSample("Gimbal_Enc", targetInfoData.Encoder, 1
 
 %% Pre parser to comply with the data structure for parsing
 calcHomedirection = dataFrameKC.dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
-% calcHomedirection.VelNorth = calcHomedirection.VecX;
-% calcHomedirection.VelEast = calcHomedirection.VecY;
-% calcHomedirection.VelDown = calcHomedirection.VecZ;
-
 
 %%
 trajSample = TrajectorySample("GPSPositionSample", dataFrameKC.dataTable.POSITION, ...

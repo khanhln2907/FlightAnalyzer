@@ -1,7 +1,9 @@
-function [samples] = get_data_0908(dataTablePath)
+function [out] = get_data_0908(dataTablePath)
 
 dataHandle = load(dataTablePath);
 dataTable = dataHandle.data_table;
+dataTable = clean_data(dataTable);
+
 
 % VN200 data
 sampleTable.Sensors.accSample =  AccelerationSample("VN200_Acceleration", dataTable.ACCELERATION, 800);
@@ -20,7 +22,11 @@ sampleTable.Setpoint.vel = VelocitySample("FCON_SP_VEL", dataTable.FCON_LOG_SP(:
 
 % Handle for animation
 calcHomedirection = dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
-sampleTable.trajSample = TrajectorySample("GPSPositionSample", dataTable.POSITION, ...
+
+% Analyzer
+out.samples = sampleTable;
+out.dataTable = dataTable;
+out.flightAnalyzer = TrajectorySample("GPSPositionSample", dataTable.POSITION, ...
                               "VelNEDSample" , dataTable.VELOCITY_NED, ...
                               "AttitudeSample", dataTable.ATTITUDE, ...
                               "RateSample", dataTable.ATTITUDE_RATE,...
@@ -31,6 +37,15 @@ sampleTable.trajSample = TrajectorySample("GPSPositionSample", dataTable.POSITIO
                               "TrackingNEDSample", calcHomedirection, ...
                               "TargetInfoSample", dataTable.TARGET_INFO);
 
-samples = sampleTable;
+out.rateAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.rateSample, sampleTable.Sensors.rateFilterredSample, sampleTable.Setpoint.rate});
+out.attAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.attSample, sampleTable.Setpoint.att});
 end
+
+
+
+function dataTable = clean_data(dataTable)
+    % Ignore the time after synchronization (normally 30s after starting up)
+    dataTable = get_segment_datatable_topic(dataTable, 35, inf);
+end
+
 
