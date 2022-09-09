@@ -27,7 +27,7 @@ classdef VelocitySample < Sample
         
         
         function isValid = check_data_format(obj)
-            flag = isfield(obj.data, ["Time", "Count", "VelNorth", "VelEast", "VelDown"]);
+            flag = isfield(obj.data, ["Time", "VelNorth", "VelEast", "VelDown"]);
             isValid = all(flag == 1);
         end
         

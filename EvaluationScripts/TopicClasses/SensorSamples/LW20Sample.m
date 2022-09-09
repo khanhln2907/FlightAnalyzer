@@ -8,7 +8,7 @@ classdef LW20Sample < LidarSample
     
     methods
         function isValid = check_data_format(obj)
-            flag = isfield(obj.data, ["Time", "Distance", "FirstRaw", "LastRaw", "SS1", "SS2"]);
+            flag = isfield(obj.data, ["Time", "Distance", "FirstRaw", "SS1", "LastRaw", "SS2"]);
             isValid = all(flag == 1);
         end
         
@@ -26,6 +26,9 @@ classdef LW20Sample < LidarSample
             dataStruct.SS = obj.data.SS;
         end
         
+        function obj = set_data_format(obj)
+           obj.dataFormat = LW20Format;
+        end
     end
 end
 
