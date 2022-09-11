@@ -21,7 +21,7 @@ sampleTable.Sensors.lidarSample = LW20Sample("LW20", dataTable.LIDAR_GROUND, 150
 sampleTable.Setpoint.rate =  AttitudeRateSample("FCON_SP_RATE", dataTable.FCON_LOG_SP(:, ["Time", "p", "q", "r"]), 800);
 sampleTable.Setpoint.att =  AttitudeSample("FCON_SP_ATT", dataTable.FCON_LOG_SP(:, ["Time", "Phi", "Theta", "Psi"]), 400);
 sampleTable.Setpoint.vel = VelocitySample("FCON_SP_VEL", dataTable.FCON_LOG_SP(:, ["Time", "VelNorth", "VelEast", "VelDown"]), 100);
-
+sampleTable.Setpoint.mixer = MixerSample("FCON_SP_MIXER", dataTable.FCON_SET_MIXER_SIG, 50);
 % Handle for animation
 calcHomedirection = dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
 

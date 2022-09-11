@@ -12,8 +12,8 @@ global tInterval
 tInterval = [-inf inf];
 
 close all;
-plot_flight_mode()
-plot_attitude()
+%plot_flight_mode()
+%plot_attitude()
 plot_pid_controller()
 
 
@@ -39,9 +39,12 @@ function plot_pid_controller()
     figure("Name", "PID Controller States");
     fNames = fieldnames(data.dataTable.PID_CONTROLLER);
     for i = 1:numel(fNames)
-       ax(i) = subplot(2, 3, mod(i,7));
+       %ax(i) = subplot(2, 3, mod(i,7));
+       figure
+       ax(i) = axes();
        plotPID(ax(i), data.dataTable.PID_CONTROLLER.(fNames{i}), tInterval);
        title(sprintf("%s", fNames{i}));
+       FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
     end
     
     linkaxes(ax, 'x');
