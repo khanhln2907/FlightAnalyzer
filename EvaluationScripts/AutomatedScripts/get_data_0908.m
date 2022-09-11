@@ -2,8 +2,10 @@ function [out] = get_data_0908(dataTablePath)
 
 dataHandle = load(dataTablePath);
 dataTable = dataHandle.data_table;
-dataTable = clean_data(dataTable);
 
+out.rawDataTable = dataTable;
+
+dataTable = clean_data(dataTable);
 
 % VN200 data
 sampleTable.Sensors.accSample =  AccelerationSample("VN200_Acceleration", dataTable.ACCELERATION, 800);
@@ -39,6 +41,7 @@ out.flightAnalyzer = TrajectorySample("GPSPositionSample", dataTable.POSITION, .
 
 out.rateAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.rateSample, sampleTable.Sensors.rateFilterredSample, sampleTable.Setpoint.rate});
 out.attAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.attSample, sampleTable.Setpoint.att});
+out.velAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.velSample, sampleTable.Setpoint.vel});
 end
 
 
@@ -46,6 +49,11 @@ end
 function dataTable = clean_data(dataTable)
     % Ignore the time after synchronization (normally 30s after starting up)
     dataTable = get_segment_datatable_topic(dataTable, 35, inf);
+
+    % Work around 
+    if(~isfield(dataTable, "PID_CONTROLLER"))
+        dataTable.PID_CONTROLLER = clean_data(dataTable.PID_CONTROLLER);
+    end
 end
 
 

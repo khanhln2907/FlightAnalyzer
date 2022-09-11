@@ -231,7 +231,7 @@ classdef Sample < handle & matlab.mixin.Copyable
             timeFilter = (obj.data.Time >= pOption.tMin) & (obj.data.Time <= pOption.tMax);
             for i = 1:numel(structInfo.fName)
                 orgDataVec = obj.data.(structInfo.fName{i});
-                x = detrend(orgDataVec(timeFilter)); % .* hanning(numel(orgDataVec(timeFilter)));
+                x = detrend(orgDataVec(timeFilter)) .* hanning(numel(orgDataVec(timeFilter)));
                 [f, X] = perform_FFT(x, fs);
                 
                 figure_name = sprintf("%s_%s", figName, structInfo.fName(i));
