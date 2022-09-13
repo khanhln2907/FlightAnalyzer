@@ -113,7 +113,8 @@ function [out] = get_datatable_single(csvParentDir)
        mkdir(outputFolder)
     end
     
-    save(fullfile(outputFolder, sprintf("flight_data_parsed_%s", datetime(floor(now),'ConvertFrom','datenum'))), "data_table");
+    dateTimeStr = datetime(now,'ConvertFrom','datenum'); 
+    save(fullfile(outputFolder, sprintf("flight_data_parsed_%s", replace(string(dateTimeStr), ":", "_"))), "data_table");
     out.dataTable = data_table;    
     
     

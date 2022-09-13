@@ -1,7 +1,9 @@
 %
 %path = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_09-Sep-2022.mat"');
 %analyze_rate(path)
-dataTablePath = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_09-Sep-2022.mat"');
+%dataTablePath = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_09-Sep-2022.mat"');
+dataTablePath = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_12-Sep-2022 06_47_36.mat"');
+
 %%
 data = get_data_0908(dataTablePath);
 
@@ -19,8 +21,12 @@ frateData = data.samples.Sensors.rateFilterredSample;
 % filter = rateProposed_ChevII_40_70_15;
 % filter = rateProposed_ChevII_50_80_15;
 % filter = rateProposed_ChevII_30_75_25;
+% filter = rateProposed_ChevII_40_75_20;
+% filter = rateProposed_ChevII_35_75_25;
+% filter = rateProposed_ChevII_30_75_25;
+% filter = rateProposed_ChevII_30_75_35;
 
-filter = rateProposed_ChevII_30_75_25;
+filter = rateProposed_ChevII_40_80_28;
 
 [fpSample, pSample] = myAnalyzer.get_filterred_topic_sample(rateData.get_single_topic_sample("p"), {filter});
 [fqSample, qSample] = myAnalyzer.get_filterred_topic_sample(rateData.get_single_topic_sample("q"), {filter});
@@ -41,7 +47,7 @@ qCrossAnalyzer = CrossAnalyzerBase({qSample, fqSample});
 rCrossAnalyzer = CrossAnalyzerBase({rSample, frSample});
 
 %%
-tInterval = [320, 330];
+tInterval = [680, 690];
 
 rateData.fft_analyze("TimeInterval", tInterval)
 frateData.fft_analyze("TimeInterval", tInterval);

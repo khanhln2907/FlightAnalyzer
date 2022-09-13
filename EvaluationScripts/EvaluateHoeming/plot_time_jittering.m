@@ -25,29 +25,38 @@ function [out] = plot_time_jittering(targetInfo)
     yThres = max([abs(targetInfo.TimeEncoder); abs(targetInfo.TimeCamera)]);
     ylim([-yThres yThres]/1e3);
     
-    out.tTeensy = tTeensy(1:end-1) * 1e6;
-    out.tEnc = tEnc(1:end-1) * 1e6;
-    out.tCam = tCam(1:end-1) * 1e6;
+    out.tTeensy = tTeensy(2:end) * 1e6;
+    out.tEnc = tEnc(2:end) * 1e6;
+    out.tCam = tCam(2:end) * 1e6;
     out.dtTeensy = diff( targetInfo.TimePacket);
-    out.dtCam = diff((targetInfo.TimePacket - targetInfo.TimeCamera));
-    out.dtEnc = diff((targetInfo.TimePacket - targetInfo.TimeEncoder));
+    %out.dtCam = diff((targetInfo.TimePacket - targetInfo.TimeCamera));
+    %out.dtEnc = diff((targetInfo.TimePacket - targetInfo.TimeEncoder));
  
-    
     [~, iUniqueEnc, ~] = unique(targetInfo{:, ["Phi_Enc", "Theta_Enc", "Psi_Enc"]}, "row");
     [~, iUniqueCam, ~] = unique(targetInfo{:, ["Elevation", "Azimuth"]}, "row");
- 
+
+    out.rxTEnc = targetInfo.TimeEncoder(2:end);
+    out.EncPhi = targetInfo.Phi_Enc(2:end);
+    out.EncTheta = targetInfo.Theta_Enc(2:end);
+    out.EncPsi = targetInfo.Psi_Enc(2:end);
+
     out.uniqueEncFlag = zeros(size(dtEnc));
     out.uniqueEncFlag(iUniqueEnc) = 1;
-
-    out.EncPhi = targetInfo.Phi_Enc(1:end-1);
-    out.EncTheta = targetInfo.Theta_Enc(1:end-1);
-    out.EncPsi = targetInfo.Psi_Enc(1:end-1);
-
-    out.Elevation = targetInfo.Elevation(1:end-1);
-    out.Azimuth = targetInfo.Azimuth(1:end-1);
+    out.uniqueEncFlag = circshift(out.uniqueEncFlag , -1);
+    
+    out.rxTCam = targetInfo.TimeCamera(2:end);
+    out.Elevation = targetInfo.Elevation(2:end);
+    out.Azimuth = targetInfo.Azimuth(2:end);
+    
     out.uniqueCamFlag = zeros(size(dtCam));
     out.uniqueCamFlag(iUniqueCam) = 1;
+    out.uniqueCamFlag = circshift(out.uniqueCamFlag, -1);
+    
     
     out = struct2table(out);
+    
+    %out(out.uniqueEncFlag ~= 1, :) = [];
+    %out(out.uniqueCamFlag ~= 1, :) = [];
+
 end
 

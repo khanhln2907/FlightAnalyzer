@@ -5,7 +5,9 @@ dataTable = dataHandle.data_table;
 
 out.rawDataTable = dataTable;
 
+% Cleaning data
 dataTable = clean_data(dataTable);
+%dataTable.SORTED_TARGET_INFO =  get_sorted_target_info(dataTable.TARGET_INFO);
 
 % VN200 data
 sampleTable.Sensors.accSample =  AccelerationSample("VN200_Acceleration", dataTable.ACCELERATION, 800);
@@ -22,12 +24,22 @@ sampleTable.Setpoint.rate =  AttitudeRateSample("FCON_SP_RATE", dataTable.FCON_L
 sampleTable.Setpoint.att =  AttitudeSample("FCON_SP_ATT", dataTable.FCON_LOG_SP(:, ["Time", "Phi", "Theta", "Psi"]), 400);
 sampleTable.Setpoint.vel = VelocitySample("FCON_SP_VEL", dataTable.FCON_LOG_SP(:, ["Time", "VelNorth", "VelEast", "VelDown"]), 100);
 sampleTable.Setpoint.mixer = MixerSample("FCON_SP_MIXER", dataTable.FCON_SET_MIXER_SIG, 50);
+
 % Handle for animation
-calcHomedirection = dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
 
 % Analyzer
 out.samples = sampleTable;
 out.dataTable = dataTable;
+
+try
+calcHomedirection = dataTable.FCON_SET_HOMEINGDIRECTION_SIG;
+targetInfo = dataTable.TARGET_INFO;
+out.SEEKER.TargetInfo = get_sorted_target_info(targetInfo);
+catch
+calcHomedirection = [];    
+targetInfo = [];
+end
+
 out.flightAnalyzer = TrajectorySample("GPSPositionSample", dataTable.POSITION, ...
                               "VelNEDSample" , dataTable.VELOCITY_NED, ...
                               "AttitudeSample", dataTable.ATTITUDE, ...
@@ -37,11 +49,14 @@ out.flightAnalyzer = TrajectorySample("GPSPositionSample", dataTable.POSITION, .
                               "TerrainSPSample", dataTable.FCON_SET_TERRAIN_SIG, ...
                               "VelNEDSPSample", dataTable.FCON_LOG_SP(:, ["Time", "VelNorth", "VelEast", "VelDown"]), ...
                               "TrackingNEDSample", calcHomedirection, ...
-                              "TargetInfoSample", dataTable.TARGET_INFO);
+                              "TargetInfoSample", targetInfo);
 
 out.rateAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.rateSample, sampleTable.Sensors.rateFilterredSample, sampleTable.Setpoint.rate});
 out.attAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.attSample, sampleTable.Setpoint.att});
 out.velAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.velSample, sampleTable.Setpoint.vel});
+
+%% Additional data
+
 end
 
 
@@ -51,7 +66,7 @@ function dataTable = clean_data(dataTable)
     dataTable = get_segment_datatable_topic(dataTable, 35, inf);
 
     % Work around 
-    if(~isfield(dataTable, "PID_CONTROLLER"))
+    if(isfield(dataTable, "PID_CONTROLLER"))
         dataTable.PID_CONTROLLER = clean_data(dataTable.PID_CONTROLLER);
     end
 end
