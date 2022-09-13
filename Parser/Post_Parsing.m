@@ -70,8 +70,21 @@ function [dataTable] = Post_Parsing(dataTable)
         dataTable.PID_CONTROLLER.phiPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 4, :);
         dataTable.PID_CONTROLLER.thetaPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 5, :);
         dataTable.PID_CONTROLLER.psiPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 6, :);
+        dataTable.PID_CONTROLLER.psiDotPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 7, :);
+        dataTable.PID_CONTROLLER.velNorthPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 8, :);
+        dataTable.PID_CONTROLLER.velEastPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 9, :);
+        dataTable.PID_CONTROLLER.velDownPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 10, :);
+        dataTable.PID_CONTROLLER.latPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 11, :);
+        dataTable.PID_CONTROLLER.lonPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 12, :);
+        dataTable.PID_CONTROLLER.altPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 13, :);
+        dataTable.PID_CONTROLLER.hoemingPID = dataTable.PID_INTERNAL_STATE(dataTable.PID_INTERNAL_STATE.ID == 14, :);
     end
     
+    catch
+        
+    end
+    
+    try
     %% Extract flight mode from controller setpoint priorities
         cats = categorical({'IDLE', 'RATE', 'ATTITUDE', 'VEL_MAN', 'VEL_AUTO', 'TERRAIN', 'POS', 'DIR'});
         

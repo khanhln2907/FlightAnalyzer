@@ -1,10 +1,10 @@
 % Load the data
 global data
 
-path = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_12-Sep-2022 06_47_36.mat"');
+%path = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00004\MATLAB', "flight_data_parsed_12-Sep-2022 06_47_36.mat"');
 %path = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00005\MATLAB', "flight_data_parsed_12-Sep-2022 08_52_25.mat"');
 %path = fullfile(pwd,'Local\2022-09-08\KC2\Processed_LOG00003\MATLAB', "flight_data_parsed_12-Sep-2022 08_50_08.mat"');
-
+path = fullfile(pwd,'Local\2022-09-13\KC2\Processed_LOG00002\MATLAB', "flight_data_parsed_13-Sep-2022 16_25_57.mat"');
 data = get_data_0908(path);
 
 % Get additional data
@@ -20,15 +20,15 @@ tInterval = [-inf inf];
 plot_flight_mode()
 plot_velocity()
 plot_attitude()
-plot_pid_controller()
 
 %%
-analyze_cross_corr_pid(693, 695);
+%plot_pid_controller()
+%analyze_cross_corr_pid(693, 695);
 %%
 %analyze_cross_corr_seeker(683, 703);
 
 try
-    analyze_cross_corr_seeker(683, 703);
+    analyze_cross_corr_seeker(200, 230);
 catch
     
 end
