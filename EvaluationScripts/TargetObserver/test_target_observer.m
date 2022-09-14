@@ -3,22 +3,47 @@ addpath("Math");
 addpath("FlighLogs");
 
 %close all;
-if(exist('dataTable','var'))
-   data = dataTable;
-else
-   dataHandle = load('FlightLogs\2022-02-01\K2\Parsed_LOG00003.mat'); 
-   data = dataHandle.dataTable;    
-end
+% if(exist('dataTable','var'))
+%    data = dataTable;
+% else
+%    dataHandle = load('FlightLogs\2022-02-01\K2\Parsed_LOG00003.mat'); 
+%    data = dataHandle.dataTable;    
+% end
+
+path = fullfile(pwd,'Local\2022-09-14\KC3\Processed_LOG00003\MATLAB', "flight_data_parsed_14-Sep-2022 17_51_47.mat"');
+dataHandle = get_data_0908(path);
+dataAnylzed = dataHandle.dataTable;
 
 %% Perform sample matching and computation of the target info 
 % Define the interval of IMU samples executing the mission  
-mission_window = (data.ATTITUDE.Time > 90 * 1e6 & data.ATTITUDE.Time < 93 * 1e6);
+mission_window = (dataAnylzed.ATTITUDE.Time > 309 * 1e6 & dataAnylzed.ATTITUDE.Time < 328 * 1e6);
+
+t_start_s = 309;
+t_end_s = 328;
+
+attData = get_topic_sample_interval(dataAnylzed.ATTITUDE, t_start_s, t_end_s);
+seekerData = dataHandle.SEEKER.TargetInfo;
+
+%%
+enc.Time = seekerData.tEnc;
+enc.Phi = seekerData.EncPhi + 2;
+enc.Theta = seekerData.EncTheta;
+enc.Psi = zeros(size(enc.Time));
+encTable = struct2table(enc);
+encData = get_topic_sample_interval(encTable, t_start_s, t_end_s);
+
+cam.Time = seekerData.tCam;
+cam.Elevation = seekerData.Elevation;
+cam.Azimuth = seekerData.Azimuth;
+camTable = struct2table(cam);
+camData = get_topic_sample_interval(camTable, t_start_s, t_end_s);
+
 
 % Prepare the samples for the input arguments
-sample_att_uav_deg = [data.ATTITUDE.Time(mission_window), data.ATTITUDE.Phi(mission_window), data.ATTITUDE.Theta(mission_window), data.ATTITUDE.Psi(mission_window)];
-time_shif_gimbal_us = +0.060 * 1e6; % Some fast testing time shift to see the effect of the delay
-sample_att_gimbal_deg = [data.TARGET_INFO.TimeEncoder + time_shif_gimbal_us, data.TARGET_INFO.Phi_Enc, data.TARGET_INFO.Theta_Enc, data.TARGET_INFO.Psi_Enc];
-sample_target_cam_sph_deg = [data.TARGET_INFO.TimeCamera, data.TARGET_INFO.Azimuth, data.TARGET_INFO.Elevation];
+sample_att_uav_deg = [attData.Time, attData.Phi, attData.Theta, attData.Psi];
+time_shif_gimbal_us = +0.000 * 1e6; % Some fast testing time shift to see the effect of the delay
+sample_att_gimbal_deg = [encData.Time, encData.Phi, encData.Theta, encData.Psi];
+sample_target_cam_sph_deg = [camData.Time, camData.Azimuth, camData.Elevation];
 
 % Compute all samples 
 [sample_target_ned, matched_timestamp] = async_calculate_target_direction(sample_att_uav_deg, sample_att_gimbal_deg, sample_target_cam_sph_deg);
@@ -82,13 +107,13 @@ figure
 vel = 15;
 line = plot(sample_target_ned(:,1) / 1e6, sample_target_ned(:,2) * vel, '-o', "DisplayName", "Calc North");
 hold on; grid on;
-plot(data.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, data.FCON_SET_HOMEINGDIRECTION_SIG.VecX * vel, '*', "DisplayName", "Logged North", "Color", [1 0 0])
+plot(dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.VelNorth * vel, '*', "DisplayName", "Logged North", "Color", [1 0 0])
 
 plot(sample_target_ned(:,1) / 1e6, sample_target_ned(:,3) * vel, '-o', "DisplayName", "Calc East");
-plot(data.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, data.FCON_SET_HOMEINGDIRECTION_SIG.VecY * vel, '*', "DisplayName", "Logged East", "Color", [1 0 0])
+plot(dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.VelEast * vel, '*', "DisplayName", "Logged East", "Color", [1 0 0])
 
 plot(sample_target_ned(:,1) / 1e6, sample_target_ned(:,4) * vel, '-o', "DisplayName", "Calc Down");
-plot(data.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, data.FCON_SET_HOMEINGDIRECTION_SIG.VecZ * vel, '*', "DisplayName", "Logged Down", "Color", [1 0 0])
+plot(dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.Time / 1e6, dataAnylzed.FCON_SET_HOMEINGDIRECTION_SIG.VelDown * vel, '*', "DisplayName", "Logged Down", "Color", [1 0 0])
 %plot(data. / 1e6, sample_target_ned(:,4) * vel, '-o', "DisplayName", "Calc Down");
 title("Computed target vector NED with time correction")
 legend

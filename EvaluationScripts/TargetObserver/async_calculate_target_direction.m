@@ -23,7 +23,7 @@ function [sample_target_ned, matched_timestamp] = async_calculate_target_directi
     sample_target_ned = zeros(n_samples, 4);
     matched_timestamp = zeros(n_samples, 3); % This is be used to evaluate the matching
     
-    for i = 1:n_samples
+    for i = 2:n_samples
         % Get the available (real-time / causal) sample
         enc_avail = sample_att_gimbal_deg(1:i, :);
         cam_avail = sample_target_cam_sph_deg(1:i, :);
@@ -37,24 +37,43 @@ function [sample_target_ned, matched_timestamp] = async_calculate_target_directi
 
         % Find the macthed values in the available buffer 
 
+        %%
         % imu - assume data is always available
-        dt_diff_imu = t_oldest - sample_att_uav_deg(:,1);
-        [~, id_imu] = min(abs(dt_diff_imu));
-
+%         dt_diff_imu = t_oldest - sample_att_uav_deg(:,1);
+%         [~, id_imu] = min(abs(dt_diff_imu));
+% 
+%         % encoder
+%         dt_diff_enc = t_oldest - enc_avail(:,1);
+%         [~, id_enc] = min(abs(dt_diff_enc));
+% 
+%         % camera
+%         dt_diff_cam = t_oldest - cam_avail(:,1);
+%         [~, id_cam] = min(abs(dt_diff_cam));
+% 
+%         % Compute the target in NED frame
+%         % The timestamp
+%         sample_target_ned(i, 1) = t_oldest;
+%         % The reconstructed value
+%         sample_target_ned(i, 2:4) = calculate_target_direction(sample_att_uav_deg(id_imu, 2:4), enc_avail(id_enc, 2:4), cam_avail(id_cam, 2:3));
+%         matched_timestamp(i,:) =  [sample_att_uav_deg(id_imu, 1), enc_avail(id_enc, 1), cam_avail(id_cam, 1)];
+        
+        %%
+        % imu - assume data is always available
+        intplImu = interp1(sample_att_uav_deg(:,1), sample_att_uav_deg(:,2:4), t_oldest);
+        
         % encoder
-        dt_diff_enc = t_oldest - enc_avail(:,1);
-        [~, id_enc] = min(abs(dt_diff_enc));
-
+        intplEnc = interp1(enc_avail(:,1), enc_avail(:,2:4), t_oldest);
+        
         % camera
-        dt_diff_cam = t_oldest - cam_avail(:,1);
-        [~, id_cam] = min(abs(dt_diff_cam));
-
+        intplCam = interp1(cam_avail(:,1), cam_avail(:,2:3), t_oldest);
+        
         % Compute the target in NED frame
         % The timestamp
         sample_target_ned(i, 1) = t_oldest;
         % The reconstructed value
-        sample_target_ned(i, 2:4) = calculate_target_direction(sample_att_uav_deg(id_imu, 2:4), enc_avail(id_enc, 2:4), cam_avail(id_cam, 2:3));
-        matched_timestamp(i,:) =  [sample_att_uav_deg(id_imu, 1), enc_avail(id_enc, 1), cam_avail(id_cam, 1)];
+        sample_target_ned(i, 2:4) = calculate_target_direction(intplImu, intplEnc, intplCam);
+        matched_timestamp(i,:) =  [t_oldest,t_oldest, t_oldest];
+        
     end
     
     %% Perform post-interpolation if needed

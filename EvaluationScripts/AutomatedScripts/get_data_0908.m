@@ -25,6 +25,13 @@ sampleTable.Setpoint.att =  AttitudeSample("FCON_SP_ATT", dataTable.FCON_LOG_SP(
 sampleTable.Setpoint.vel = VelocitySample("FCON_SP_VEL", dataTable.FCON_LOG_SP(:, ["Time", "VelNorth", "VelEast", "VelDown"]), 100);
 sampleTable.Setpoint.mixer = MixerSample("FCON_SP_MIXER", dataTable.FCON_SET_MIXER_SIG, 50);
 
+dirSP = dataTable.FCON_LOG_SP(:, ["Time", "DirNorth", "DirEast", "DirDown"]);
+maxV = dataTable.FCON_LOG_SP(:, ["Time", "DirMaxV"]);
+maxV = maxV.DirMaxV;
+dirSP.VelNorth = dirSP.DirNorth .* maxV; dirSP.DirNorth = [];
+dirSP.VelEast = dirSP.DirEast .* maxV; dirSP.DirEast = [];
+dirSP.VelDown = dirSP.DirDown .* maxV; dirSP.DirDown = [];
+sampleTable.Setpoint.velDir = VelocitySample("FCON_SP_VEL_DIR", dirSP, 100);
 % Handle for animation
 
 % Analyzer
@@ -53,7 +60,7 @@ out.flightAnalyzer = TrajectorySample("GPSPositionSample", dataTable.POSITION, .
 
 out.rateAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.rateSample, sampleTable.Sensors.rateFilterredSample, sampleTable.Setpoint.rate});
 out.attAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.attSample, sampleTable.Setpoint.att});
-out.velAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.velSample, sampleTable.Setpoint.vel});
+out.velAnalyzer = CrossAnalyzerBase({sampleTable.Sensors.velSample, sampleTable.Setpoint.velDir, sampleTable.Setpoint.vel});
 
 %% Additional data
 
