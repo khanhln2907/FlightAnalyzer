@@ -88,8 +88,8 @@ classdef TrajectorySample < handle
             
         end
         
-        function h = animate_gps_3d(obj, t_min_s, t_max_s)
-            step = 50;
+        function h = animate_gps_3d(obj, t_min_s, t_max_s, scale)
+            step = 20;
             
             GPSData = get_topic_sample_interval(obj.posGPSSample, t_min_s, t_max_s);
             
@@ -147,7 +147,12 @@ classdef TrajectorySample < handle
             h.SetpointVector = plot3(vX_set, vY_set, vZ_set,'->', 'Color', [1 0 0 0.5], 'DisplayName', 'IC Vel. setpoint');
 
             %h.SetpointDirVector = quiver3(UAV_X(1), UAV_Y(1), UAV_Alt(1), TARGET_DIR.VelEast(1), TARGET_DIR.VelNorth(1), TARGET_DIR.VelDown(1), 10, 'DisplayName', "TargetDir");
+            
+            if(~exist("scale", "var"))
             scale = 10;
+            end
+            
+            
             h.SetpointDirVector = plot3(scale * [UAV_X(1) TARGET_DIR.VelEast(1)], scale * [UAV_Y(1) TARGET_DIR.VelNorth(1)], scale * [UAV_Alt(1) TARGET_DIR.VelDown(1)], '-*', 'DisplayName', "TargetDir");
 
             
