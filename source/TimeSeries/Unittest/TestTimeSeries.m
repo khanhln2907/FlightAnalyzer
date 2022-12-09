@@ -8,7 +8,7 @@ t = 1:1/fs:10;
 x = sin(2*pi*f *t);
 
 % TimeSeries instance
-rateVn200Info = TSInfo("VN200_p", "Deg/s", "p", fs);
+rateVn200Info = TSInfo("VN200_p", "deg/s", "p", fs);
 rateTs = TimeSeries(t, x, rateVn200Info);
 
 % Functionalities of TS

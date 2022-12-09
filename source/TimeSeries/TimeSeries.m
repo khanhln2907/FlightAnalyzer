@@ -75,14 +75,14 @@ classdef TimeSeries < handle
         % Plot the time series 
         function [retFig, name] = plot(obj, varargin)
             [param] = Parser.parse(varargin{:});
-            name = sprintf("Time_series_3_axes_%s_%s_%s", obj.Info.Name, string(param.tMin), string(param.tMax));
+            name = sprintf("Time_series_%s_%s s_%s s", obj.Info.Name, string(param.tMin), string(param.tMax));
             
             % Plotting            
             retFig = figure("Name", name);
             tFilter = (obj.Time >= param.tMin) & (obj.Time < param.tMax);
 
             line = plot(obj.Time(tFilter), obj.Value(tFilter), '-o', "DisplayName", obj.Info.AxisLabel);
-            ylabel(sprintf("%s [%s]", obj.Info.Name, obj.Info.AxisLabel));
+            ylabel(sprintf("%s [%s]", obj.Info.AxisLabel, obj.Info.Unit));
     
             xlabel("Time [s]");
             FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
