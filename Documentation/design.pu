@@ -1,0 +1,61 @@
+@startuml
+
+title Flight Controller Architecture 3.2
+
+class FConBase {
+    - Setpoint
+    - SensorValues 
+}
+
+class ControllerBase{
+    + execute()
+    + reset()
+}
+
+class PIDController {
+
+}
+
+class MixerBase {
+    + mapping() 
+}
+
+class PWMMixer {
+    + writePWM()
+}
+
+class MixerQuadcopter31 {
+
+}
+
+class DShotMixer{
+
+}
+
+interface CtrlParams{
+
+}
+
+class FilterBase{
+
+}
+
+QActive -r-|> Hsm
+FConBase -u-|> QActive
+
+FConBase -d-> "1..n" ControllerBase
+LinearCtrl -u-|> ControllerBase
+PIDController -u-|> LinearCtrl  
+NonlinearCtrl -u-|> ControllerBase
+ControllerBase -r-> CtrlParams
+
+FConBase -d-> MixerBase
+PWMMixer -u-|> MixerBase
+MixerQuadcopter31 -u-|> PWMMixer
+DShotMixer -u-|> MixerBase
+MixerQuadcopter32 -u-|> DShotMixer
+
+FConBase -d-> "1..n" FilterBase
+SmoothingFilter -u-|> FilterBase 
+
+@enduml
