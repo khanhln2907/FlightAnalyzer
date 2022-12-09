@@ -34,40 +34,65 @@ classdef TimeSeries < handle
         
         
         %% fft_analyze
+        % Perform fft analysis according to the given sampling frequency
+        % fs. Check "TimeInterval" option in the parser for better
+        % resolution!
         function [f, X] = fft_analyze(obj, varargin)
-            pOption = ParameterParser.parse(varargin{:});
+            pOption = Parser.parse(varargin{:});
             fs = obj.Info.fs;
-            
-            
 
             % Get the time sample segment to perform fft analysis+
             figName =  sprintf("FFT_%s_[%d_s_%d_s]", obj.Info.Name, round(pOption.tMin), round(pOption.tMax));
-            timeFilter = (obj.data.Time >= pOption.tMin) & (obj.data.Time <= pOption.tMax);
+            timeFilter = (obj.Time >= pOption.tMin) & (obj.Time <= pOption.tMax);
             orgDataVec = obj.Value;
             
             % Perform FFT
-            x = detrend(orgDataVec(timeFilter)) .* hanning(numel(orgDataVec(timeFilter)));
+            x = detrend(orgDataVec(timeFilter)); % .* hanning(numel(orgDataVec(timeFilter)));
             [f, X] = perform_FFT(x, fs);
             
             % Plotting
-            figure_name = sprintf("%s_%s", figName, structInfo.fName(i));
+            figure_name = sprintf("%s_%s", figName, obj.Info.AxisLabel);
             fig = figure('Name', figure_name, 'Position', get(0, 'Screensize'));
             plot(f, X, '-o');
             hold on; 
             FormatFigure(gcf, 12, 12/8, 'MarkerSize', 3);
 
             xlabel("Freq [Hz]");
-            ylabel(sprintf("Magnitude %s", lower(structInfo.interpreterName(i))));
-            title(sprintf("FFT of %s \n [%.1f, %.1f] [s] ", obj.topic, pOption.tMin, pOption.tMax), 'Interpreter', 'None')
+            ylabel(sprintf("Magnitude %s", lower(obj.Info.AxisLabel)));
+            title(sprintf("FFT of %s \n [%.1f, %.1f] [s] ", obj.Info.Name, pOption.tMin, pOption.tMax), 'Interpreter', 'None')
 
             pbaspect([4 3 4]) % TODO: bring this out as parameter
 
             % Saving
-            if(isstring(pOption.SavePath))
-                savePath = fullfile(pOption.SavePath, "FFT", figName);
-                obj.save_figure(fig, savePath, figure_name);
+%             if(isstring(pOption.SavePath))
+%                 savePath = fullfile(pOption.SavePath, "FFT", figName);
+%                 obj.save_figure(fig, savePath, figure_name);
+%             end
+        end
+        
+        
+        %% plot()
+        % Plot the time series 
+        function [retFig, name] = plot(obj, varargin)
+            [param] = Parser.parse(varargin{:});
+            name = sprintf("Time_series_3_axes_%s_%s_%s", obj.Info.Name, string(param.tMin), string(param.tMax));
+            
+            % Plotting            
+            retFig = figure("Name", name);
+            tFilter = (obj.Time >= param.tMin) & (obj.Time < param.tMax);
+
+            line = plot(obj.Time(tFilter), obj.Value(tFilter), '-o', "DisplayName", obj.Info.AxisLabel);
+            ylabel(sprintf("%s [%s]", obj.Info.Name, obj.Info.AxisLabel));
+    
+            xlabel("Time [s]");
+            FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+            
+            if(isstring(param.SavePath))
+                savePath = fullfile(param.SavePath, sprintf("%s", obj.topic));
+                obj.save_figure(retFig, savePath, name);
             end
         end
+        
         
         function save_figure(obj, retFig, savePath, figName)
             save_figure(retFig, savePath, figName)

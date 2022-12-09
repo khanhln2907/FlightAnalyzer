@@ -6,13 +6,15 @@ classdef TSInfo < handle
         Name
         Unit
         AxisLabel
+        fs
     end
     
     methods
-        function obj = TSInfo(Name, Unit, AxisLabel)
+        function obj = TSInfo(Name, Unit, AxisLabel, fs)
             obj.Name = Name;
             obj.Unit = Unit;
             obj.AxisLabel = AxisLabel;
+            obj.fs = fs;
         end
     end
 end
