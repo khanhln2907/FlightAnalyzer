@@ -68,8 +68,8 @@ function [ Fig ] = FormatFigure( Fig, Width, AspectRatio, varargin )
         curAx.FontUnits = 'points';
         curAx.FontSize = ChartFontSize;
         curAx.LineWidth = 2;
-        curAx.XRuler.Axle.LineWidth = 2;
-        curAx.YRuler.Axle.LineWidth = 2;
+        curAx.XRuler.Axle.LineWidth = 1.5;
+        curAx.YRuler.Axle.LineWidth = 1.5;
 
         
         box on;

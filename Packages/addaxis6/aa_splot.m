@@ -7,15 +7,21 @@ function varargout = aa_splot(varargin)
 %  
 %  Usage is exactly the same as for plot.  
 
+if ~isMATLABReleaseOlderThan("R2022a")
+    colorOrdStr = 'colorord';
+else 
+    colorOrdStr = 'ColorOrder';
+end
+
 np = get(gca,'nextplot');
 oldplots = get(gca,'children');
 
-cord = get(gca,'colorord');
+cord = get(gca,colorOrdStr);
 
 if ~isempty(oldplots)
 lastcolor = get(oldplots(1),'color');
 if lastcolor == cord(1,:),
-  set(gca,'colorord',cord(mod([0:6]+1,7)+1,:));
+  set(gca,colorOrdStr,cord(mod([0:6]+1,7)+1,:));
 end
 end
 
@@ -29,6 +35,6 @@ end
 
 %if nargout > 0, varargout{:} = h; end;
 
-set(gca,'colorord',cord(mod([0:6]+1,7)+1,:));
+set(gca,colorOrdStr,cord(mod([0:6]+1,7)+1,:));
 set(gca,'nextplot',np);
 set(gca,'box','on');
