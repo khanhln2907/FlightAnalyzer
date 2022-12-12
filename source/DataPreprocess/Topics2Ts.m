@@ -1,15 +1,15 @@
-function out = Topics2Ts(dataTable, topicName, tsFields, topicInfo)
+function out = Topics2Ts(dataTable, topic, topicType)
     % Convert the given topic and the fieldnames into time series
     
     try 
         % Check if "Timestamp" exist ... 
         % Check if the requested fields exist ...
         
-        out = cell(numel(tsFields), 1);
+        out = cell(numel(topicType.DataFields), 1);
         
-        for i = 1: numel(tsFields)
-            tsInfo = TSInfo(topicInfo.Name,  tsFields(i), topicInfo.Unit, tsFields(i), topicInfo.fs);
-            out{i} = TimeSeries(dataTable.(topicName).Time / 1e6, dataTable.(topicName).(tsFields(i)), tsInfo); %!Todo: check "Time" field
+        for i = 1: numel(topicType.DataFields)
+            tsInfo = TSInfo(topicType.Source,  topicType.DataFields(i), topicType.Unit, topicType.DataFields(i), topicType.fs);
+            out{i} = TimeSeries(dataTable.(topic).Time / 1e6, dataTable.(topic).(topicType.DataFields(i)), tsInfo); %!Todo: check "Time" field
         end        
     catch ME
         fprintf('\n %s \n',ME.message);

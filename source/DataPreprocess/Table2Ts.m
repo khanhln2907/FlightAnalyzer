@@ -1,4 +1,4 @@
-function [out] = Table2Ts(dataTable)
+function [out] = Table2Ts(topic, topicInfo)
  fNames = fieldnames(dataTable);
     
     % Process all fieldnames
