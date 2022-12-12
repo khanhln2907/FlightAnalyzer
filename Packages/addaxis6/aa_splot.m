@@ -7,10 +7,13 @@ function varargout = aa_splot(varargin)
 %  
 %  Usage is exactly the same as for plot.  
 
-if ~isMATLABReleaseOlderThan("R2022a")
-    colorOrdStr = 'colorord';
-else 
+v= ver('MATLAB'); 
+if v.Release=="(R2018b)"
     colorOrdStr = 'ColorOrder';
+elseif v.Release=="(R2021a)"
+    colorOrdStr = 'ColorOrder';
+else
+    colorOrdStr = 'colorord';   
 end
 
 np = get(gca,'nextplot');

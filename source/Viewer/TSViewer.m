@@ -8,18 +8,26 @@ classdef TSViewer
         function obj = TSViewer(TSArr)
             obj.TSArr = TSArr;
         end
+       
         
         function obj = plot(obj, varargin)
-            nTs = numel(obj.TSArr);
-            
+            % Parse the plotting info
             param = Parser.parse(varargin{:});
             
-            figure 
-            for i = 1 : nTs
-               tFilter =  (obj.TSArr(i).Time <= param.tMax) & (obj.TSArr(i).Time >= param.tMin);  
-               ax(i) = plot(obj.TSArr(i).Time(tFilter), obj.TSArr(i).Value(tFilter), "-o", "Color", ColorTable.colormat(i,:));
-               hold on;                
-            end            
+            % Plot
+            figure
+            tFilter =  (obj.TSArr{1}.Time <= param.tMax) & (obj.TSArr{1}.Time >= param.tMin);
+            plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter));
+            hold on;
+            for i = 2:numel(obj.TSArr)
+                tFilter =  (obj.TSArr{i}.Time <= param.tMax) & (obj.TSArr{i}.Time >= param.tMin);
+                addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter));
+            end
+            ylabels = {obj.TSArr{1}.Info.AxisLabel, obj.TSArr{2}.Info.AxisLabel};
+            xlabel('Time [s]');
+            legend
+            
+            % Post plotting
             FormatFigure(gcf, 8, 4/3, 'MarkerSize', 3);
         end
         
@@ -44,7 +52,7 @@ classdef TSViewer
 %             legend('one','two','three','four','five','three-2','five-2');
 %             
             %FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
-            
+            figure
             N = 10;
             time = linspace(1,24,N);
             D = rand(7,N);
