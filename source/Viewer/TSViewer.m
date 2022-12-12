@@ -1,14 +1,26 @@
-classdef TSViewer
+classdef TSViewer < handle
     
     properties
-        TSArr        
+        TSArr
+    end
+    
+    properties(Access = private)
+        legendName
     end
     
     methods
         function obj = TSViewer(TSArr)
             obj.TSArr = TSArr;
+            obj.updateLegendArr();
         end
        
+        function ret = updateLegendArr(obj)
+           obj.legendName = [];
+           for i = 1: numel(obj.TSArr)
+               obj.legendName = [obj.legendName obj.TSArr{i}.Info.getLegendName()];
+           end
+           ret = obj.legendName;
+        end
         
         function obj = plot(obj, varargin)
             % Parse the plotting info
@@ -18,15 +30,16 @@ classdef TSViewer
             for i = 1:numel(obj.TSArr)
                 tFilter =  (obj.TSArr{i}.Time <= param.tMax) & (obj.TSArr{i}.Time >= param.tMin);
                 if(i == 1)
-                    plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter));
+                    plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter), '-o');
                     hold on;
                 else
-                    addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter));
+                    addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter), '-o');
                 end
-                addaxislabel(i,sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit));
+                str = sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit);
+                addaxislabel(i, str);
             end
             xlabel('Time [s]');
-            legend
+            legend(obj.legendName, "Interpreter", "None");
             
             % Post plotting
             FormatFigure(gcf, 8, 4/3, 'MarkerSize', 3);
