@@ -2,6 +2,7 @@
 function [info] = SensorInfo()
     info.vn200 = getVn200Info();
     info.lw20 = getLW20Info();
+    info.sp = getRateSpInfo();
 end
 
 %% Source | DataField | Unit | AxisLabel | Fs
@@ -15,4 +16,11 @@ end
 function lw20 = getLW20Info()
     lw20.d = TopicInfo("LW20", ["Distance", "FirstRaw", "LastRaw"], "m", "Distance", 249);
     lw20.ss = TopicInfo("LW20", ["SS1", "SS2"], "", "Strength", 249);
+end
+
+function sp = getRateSpInfo()
+    sp.rate = TopicInfo("SP", ["p", "q", "r"], "rad/s", "RATE", 800);
+    sp.att = TopicInfo("SP", ["Phi", "Theta", "Psi"], "deg", "ATTITUDE", 400);
+    sp.vel = TopicInfo("SP", ["VelNorth", "VelEast", "VelDown"], "m/s", "VELOCITY", 100);    
+    sp.pos = TopicInfo("SP", ["Lat", "Lon"], "deg", "WGS84", 10);
 end
