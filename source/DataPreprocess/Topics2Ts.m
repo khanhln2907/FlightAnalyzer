@@ -9,7 +9,7 @@ function out = Topics2Ts(dataTable, topicName, tsFields, topicInfo)
         
         for i = 1: numel(tsFields)
             tsInfo = TSInfo(topicInfo.Name,  tsFields(i), topicInfo.Unit, tsFields(i), topicInfo.fs);
-            out{i} = TimeSeries(dataTable.(topicName).Time, dataTable.(topicName).(tsFields(i)), tsInfo); %!Todo: check "Time" field
+            out{i} = TimeSeries(dataTable.(topicName).Time / 1e6, dataTable.(topicName).(tsFields(i)), tsInfo); %!Todo: check "Time" field
         end        
     catch ME
         fprintf('\n %s \n',ME.message);
