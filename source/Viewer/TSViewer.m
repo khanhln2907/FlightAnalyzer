@@ -13,17 +13,18 @@ classdef TSViewer
         function obj = plot(obj, varargin)
             % Parse the plotting info
             param = Parser.parse(varargin{:});
-            
             % Plot
             figure
-            tFilter =  (obj.TSArr{1}.Time <= param.tMax) & (obj.TSArr{1}.Time >= param.tMin);
-            plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter));
-            hold on;
-            for i = 2:numel(obj.TSArr)
+            for i = 1:numel(obj.TSArr)
                 tFilter =  (obj.TSArr{i}.Time <= param.tMax) & (obj.TSArr{i}.Time >= param.tMin);
-                addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter));
+                if(i == 1)
+                    plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter));
+                    hold on;
+                else
+                    addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter));
+                end
+                addaxislabel(i,sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit));
             end
-            ylabels = {obj.TSArr{1}.Info.AxisLabel, obj.TSArr{2}.Info.AxisLabel};
             xlabel('Time [s]');
             legend
             
