@@ -8,6 +8,7 @@ end
 %% Source | DataField | Unit | AxisLabel | Fs
 function vn200 = getVn200Info()
     vn200.rate = TopicInfo("VN200", ["p", "q", "r"], "rad/s", "RATE", 800);
+    vn200.frate = TopicInfo("VN200_FILTERRED", ["p", "q", "r"], "rad/s", "RATE", 800);
     vn200.att = TopicInfo("VN200", ["Phi", "Theta", "Psi"], "deg", "ATTITUDE", 400);
     vn200.vel = TopicInfo("VN200", ["VelNorth", "VelEast", "VelDown"], "m/s", "VELOCITY", 100);    
     vn200.pos = TopicInfo("VN200", ["Lat", "Lon"], "deg", "WGS84", 10);
