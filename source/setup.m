@@ -1,3 +1,4 @@
+addpath(genpath("source"));
 addpath("PlotTools");
 addpath(genpath("Packages"));
 
