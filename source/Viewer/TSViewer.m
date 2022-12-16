@@ -101,7 +101,9 @@ classdef TSViewer < handle
             hax(1).Position(3) = wax;
             legend(ylabels)
             
-            FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+            %FormatFigure(gcf, 12, 12/8, 'MarkerSize', 2.5);
+            
+            %figure;
         end
         
         function obj = test2(obj)
