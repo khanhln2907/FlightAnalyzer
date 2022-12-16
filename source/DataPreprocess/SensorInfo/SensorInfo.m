@@ -12,11 +12,13 @@ function vn200 = getVn200Info()
     vn200.att = TopicInfo("VN200", ["Phi", "Theta", "Psi"], "deg", "ATTITUDE", 400);
     vn200.vel = TopicInfo("VN200", ["VelNorth", "VelEast", "VelDown"], "m/s", "VELOCITY", 100);    
     vn200.pos = TopicInfo("VN200", ["Lat", "Lon"], "deg", "WGS84", 10);
+    vn200.alt = TopicInfo("VN200", ["Alt"], "m", "Altitude", 100);
 end
 
 function lw20 = getLW20Info()
     lw20.d = TopicInfo("LW20", ["Distance", "FirstRaw", "LastRaw"], "m", "Distance", 249);
     lw20.ss = TopicInfo("LW20", ["SS1", "SS2"], "", "Strength", 249);
+    lw20.agl = TopicInfo("LW20", ["AGL"], "m", "AGL", 100); 
 end
 
 function sp = getRateSpInfo()
@@ -25,3 +27,4 @@ function sp = getRateSpInfo()
     sp.vel = TopicInfo("SP", ["VelNorth", "VelEast", "VelDown"], "m/s", "VELOCITY", 100);    
     sp.pos = TopicInfo("SP", ["Lat", "Lon"], "deg", "WGS84", 10);
 end
+

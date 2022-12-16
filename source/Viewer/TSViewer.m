@@ -26,18 +26,21 @@ classdef TSViewer < handle
             % Parse the plotting info
             param = Parser.parse(varargin{:});
             % Plot
-            figure
-            for i = 1:numel(obj.TSArr)
-                tFilter =  (obj.TSArr{i}.Time <= param.tMax) & (obj.TSArr{i}.Time >= param.tMin);
-                if(i == 1)
-                    plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter), '-o');
-                    hold on;
-                else
-                    addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter), '-o');
-                end
-                str = sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit);
-                addaxislabel(i, str);
-            end
+%             figure
+%             for i = 1:numel(obj.TSArr)
+%                 tFilter =  (obj.TSArr{i}.Time <= param.tMax) & (obj.TSArr{i}.Time >= param.tMin);
+%                 if(i == 1)
+%                     plot(obj.TSArr{1}.Time(tFilter), obj.TSArr{1}.Value(tFilter), '-o');
+%                     hold on;
+%                 else
+%                     addaxis(obj.TSArr{i}.Time(tFilter), obj.TSArr{i}.Value(tFilter), '-o');
+%                 end
+%                 str = sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit);
+%                 addaxislabel(i, str);
+%             end
+            
+            rearangeAxis(obj.TSArr);
+            
             xlabel('Time [s]');
             legend(obj.legendName, "Interpreter", "None");
             
@@ -94,6 +97,7 @@ classdef TSViewer < handle
                 hax(k).FontSize = fontsize;
                 set(hax(k), 'YColor', hax(k).Color);
             end
+            axis auto;
             hax(1).Position(3) = wax;
             legend(ylabels)
             
