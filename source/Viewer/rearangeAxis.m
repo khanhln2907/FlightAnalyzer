@@ -22,8 +22,11 @@ function out = rearangeAxis(tsArr)
         end
         
         % Readjust the axes for readability + beautifulize
-        set(ax,'Color', 'None', 'Box', 'off');
+        set(ax,'Color', 'None', 'Box', 'on');
         set(ax, 'YAxisLocation', 'right');
+        set(ax, 'PickableParts', 'all');
+        set(ax, 'HandleVisibility', 'on');
+        set(ax, 'ButtonDownFcn', {@myAxesCallback, 33});
         
         set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]) 
         for i = 1: numel(tsArr)
@@ -43,5 +46,11 @@ function out = rearangeAxis(tsArr)
         %set(ax(3),'Visible', 'off');
 end
 
+function myAxesCallback(src,eventdata,x)
+disp("Hello");
+disp(x);
+disp(eventdata.Source);
+uistack(src, 'top');
+end
 
 

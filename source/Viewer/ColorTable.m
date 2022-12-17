@@ -3,7 +3,7 @@ classdef ColorTable
     %   Detailed explanation goes here
     
     properties (Constant)
-        colormat = linspecer(20, 'qualitative');
+        colormat = linspecer(6, 'qualitative');
     end
     
     methods
