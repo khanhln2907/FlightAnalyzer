@@ -1,10 +1,12 @@
 function out = rearangeAxis(tsArr)
-
+        global axPnt;
+        axPnt = 1;
+        
         % Pre
-        fig = figure();
+        fig = figure('KeyReleaseFcn', {@figKeyReleaseFcn});
             
         % Initialized the axes accordingly
-        ax(1) = axes();
+        ax(1) = axes('Parent', fig);
         for i = 2:numel(tsArr)
            ax(i) = copyobj(ax(1), fig);
         end
@@ -14,7 +16,7 @@ function out = rearangeAxis(tsArr)
         % Plot them and color according to the color table
         for i = 1:numel(tsArr)
            ts = tsArr{i};
-           plot(ax(i), ts.Time, ts.Value, '-o', 'Color', axColors(i,:));  
+           line(i) = plot(ax(i), ts.Time, ts.Value, '-o', 'Color', axColors(i,:));  
            
            if(i  == 1)
               hold on; 
@@ -26,9 +28,9 @@ function out = rearangeAxis(tsArr)
         set(ax, 'YAxisLocation', 'right');
         set(ax, 'PickableParts', 'all');
         set(ax, 'HandleVisibility', 'on');
-        set(ax, 'ButtonDownFcn', {@myAxesCallback, 33});
+        set(ax, 'ButtonDownFcn', {@myAxesCallback});
         
-        set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]) 
+        set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]);
         for i = 1: numel(tsArr)
             ax(i).YAxis.Color = axColors(i,:);
             ylim(ax(i), ylim(ax(i))); 
@@ -39,18 +41,29 @@ function out = rearangeAxis(tsArr)
         
         axOffset = 15;
         for i = 2: numel(tsArr)
-           %ax(i).YTick = round(linspace(min(ax(i).YTick),max(ax(i).YTick),numel(ax(numel(i)).YTick)),1); 
+           ax(i).YTick = round(linspace(min(ax(i).YTick),max(ax(i).YTick),numel(ax(numel(i)).YTick)),1); 
            ax(i).YTickLabel = strcat({blanks((i-1)*axOffset)}, ax(i).YTickLabel); 
         end
         
         %set(ax(3),'Visible', 'off');
+        pan(fig, 'on');
+        %setAllowAxesPan(p,ax,true);
+
 end
 
-function myAxesCallback(src,eventdata,x)
-disp("Hello");
-disp(x);
-disp(eventdata.Source);
-uistack(src, 'top');
+% The clicked axis is set to be active
+function myAxesCallback(src,eventdata)
+    %uistack(src, 'top');
 end
 
+function figKeyReleaseFcn(src, KeyData)
+    disp("Hey");
+    disp(KeyData.Character);
+    cah = findall(src,'type','axes');
+%     for i = 1: numel(cah)
+%         disp(cah(i));
+%     end
+    %uistack(src.CurrentAxes, 'top');
+    src.Children = [src.Children(end); src.Children(1:end-1)];
+end
 
