@@ -1,10 +1,8 @@
 function out = rearangeAxis(tsArr, tMin, tMax)
-        global axPnt;
-        axPnt = 1;
-        
         % Pre
         fig = figure('KeyReleaseFcn', {@figKeyReleaseFcn});
-            
+        
+
         % Initialized the axes accordingly
         ax(1) = axes('Parent', fig);
         for i = 2:numel(tsArr)
@@ -14,21 +12,23 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         axColors = ColorTable.colormat;
         
         % Plot them and color according to the color table
+        tOffset = 0; %(tMax - tMin) * 0.1;
         for i = 1:numel(tsArr)
            ts = tsArr{i};
            tFilter =  (ts.Time <= tMax) & (ts.Time >= tMin);
            line(i) = plot(ax(i), ts.Time(tFilter), ts.Value(tFilter), '-o', 'Color', axColors(i,:));  
-           
+           xlim([tMin - tOffset tMax + tOffset]);
+           axis manual
+
            if(i  == 1)
               hold on; 
            end
         end
         
         % Readjust the axes for readability + beautifulize
-        set(ax,'Color', 'None', 'Box', 'on');
+        set(ax,'Color', 'None', 'Box', 'off');
         set(ax, 'YAxisLocation', 'right');
         set(ax, 'PickableParts', 'all');
-        set(ax, 'HandleVisibility', 'on');
         set(ax, 'ButtonDownFcn', {@myAxesCallback});
         
         set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]);
@@ -46,10 +46,22 @@ function out = rearangeAxis(tsArr, tMin, tMax)
            ax(i).YTickLabel = strcat({blanks((i-1)*axOffset)}, ax(i).YTickLabel); 
         end
         
-        %set(ax(3),'Visible', 'off');
-        pan(fig, 'on');
         set(line, "ButtonDownFcn", {@lineButtonDownFcn});
+        
+        cursorLine = xline(0,'HitTest','on', 'Parent', ax(end), "LineWidth", 2, "LineStyle", "-.");
+        fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);
+        cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
 
+end
+
+% Interactive Cursor Line
+function WBMF(this,evnt,ax,ph)
+    ph.Value = ax(1).CurrentPoint(1,1);
+end
+
+function BDF(this,evnt,ax,ph)
+    fprintf('clicked at x position: %.2f\n',ax(3).CurrentPoint(1,1))
+    triggerDatatip(this, ax(3).CurrentPoint(1,1));
 end
 
 % The clicked axis is set to be active
@@ -64,15 +76,14 @@ function figKeyReleaseFcn(src, KeyData)
 end
 
 function lineButtonDownFcn(lineSrc, hit)
-    % Responds to mouse clicks on patch objs.
-    % Add point at click location and adds a datacursor representing
-    % the underlying patch.
     % datatip() requires Matlab r2019b or later
     % Find closet vertices to mouse click
     hitPoint = hit.IntersectionPoint;
-    
-    [~, minDistIdx] = min((lineSrc.XData - hitPoint(1)).^2);
-    
+    triggerDatatip(lineSrc, hitPoint(1));
+end
+
+%% Helper function
+function triggerDatatip(lineSrc, selX)
     % Get all children of figure 
     figOrg = ancestor(lineSrc,'figure');
     cah = findall(figOrg,'type','axes');
@@ -81,7 +92,8 @@ function lineButtonDownFcn(lineSrc, hit)
         % store original hold state and return at the end
         ax = cah(i);
         axLine =  findall(ax,'type','line', 'tag', '');
-        
+        [~, minDistIdx] = min((axLine.XData - selX).^2);
+
         holdStates = ["off","on"];
         holdstate = ishold(ax);
         cleanup = onCleanup(@()hold(holdStates(holdstate+1)));
@@ -101,7 +113,6 @@ function lineButtonDownFcn(lineSrc, hit)
         clear cleanup % return hold state
         
         % Update datatip
-        pos = hit.IntersectionPoint(1:2);
         hh.DataTipTemplate.DataTipRows(end+1) = ax.YLabel.String;
     end
 end
