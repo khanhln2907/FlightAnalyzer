@@ -39,7 +39,7 @@ classdef TSViewer < handle
 %                 addaxislabel(i, str);
 %             end
             
-            rearangeAxis(obj.TSArr);
+            rearangeAxis(obj.TSArr,param.tMin, param.tMax);
             
             xlabel('Time [s]');
             legend(obj.legendName, "Interpreter", "None");
