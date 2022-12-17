@@ -16,7 +16,7 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         for i = 1:numel(tsArr)
            ts = tsArr{i};
            tFilter =  (ts.Time <= tMax) & (ts.Time >= tMin);
-           line(i) = plot(ax(i), ts.Time(tFilter), ts.Value(tFilter), '-o', 'Color', axColors(i,:));  
+           line(i) = plot(ax(i), ts.Time(tFilter), ts.Value(tFilter), '-o', 'Color', axColors(i,:), "DisplayName", ts.Info.getLegendName);  
            xlim([tMin - tOffset tMax + tOffset]);
            axis manual
 
@@ -52,6 +52,8 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);
         cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
 
+        
+        out.line = line;
 end
 
 % Interactive Cursor Line
@@ -107,7 +109,7 @@ function triggerDatatip(lineSrc, selX)
         x = axLine.XData(minDistIdx);
         y = axLine.YData(minDistIdx);
         
-        hh=plot(ax,x, y,'k.','Tag','TempDataTipMarker');
+        hh=plot(ax,x, y,'k.','Tag','TempDataTipMarker', 'HandleVisibility','off', "DisplayName", "None");
         dt = datatip(hh, x, y,'Tag','TempDataTipMarker');
         dt.DeleteFcn = @(~,~)delete(hh);
         clear cleanup % return hold state

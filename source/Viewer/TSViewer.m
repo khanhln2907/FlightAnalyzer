@@ -17,7 +17,7 @@ classdef TSViewer < handle
         function ret = updateLegendArr(obj)
            obj.legendName = [];
            for i = 1: numel(obj.TSArr)
-               obj.legendName = [obj.legendName obj.TSArr{i}.Info.getLegendName()];
+               obj.legendName = [obj.legendName; obj.TSArr{i}.Info.getLegendName()];
            end
            ret = obj.legendName;
         end
@@ -38,12 +38,21 @@ classdef TSViewer < handle
 %                 str = sprintf("%s [%s]", obj.TSArr{i}.Info.AxisLabel, obj.TSArr{i}.Info.Unit);
 %                 addaxislabel(i, str);
 %             end
-            
-            rearangeAxis(obj.TSArr,param.tMin, param.tMax);
+            if(param.tMin == -inf && param.tMax == inf)
+               param.tMin = obj.TSArr{1}.Time(1);
+               param.tMax = obj.TSArr{1}.Time(end);
+               
+               for i = 2: numel(obj.TSArr)
+                   param.tMin = min(param.tMin, obj.TSArr{i}.Time(1));
+                   param.tMax = max(param.tMin, obj.TSArr{i}.Time(end));
+               end
+            end
+
+            out = rearangeAxis(obj.TSArr,param.tMin, param.tMax);
             
             xlabel('Time [s]');
-            legend(obj.legendName, "Interpreter", "None");
-            
+            legend(out.line, obj.legendName, "Interpreter", "None", 'Position',[0.05 0.90 0.02 0.01]);
+
             % Post plotting
             FormatFigure(gcf, 8, 4/3, 'MarkerSize', 3);
         end
