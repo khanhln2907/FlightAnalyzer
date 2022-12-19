@@ -1,5 +1,4 @@
 addpath(genpath("source"));
-addpath("PlotTools");
+addpath(genpath("scripts"));
 addpath(genpath("Packages"));
-
 addpath(genpath("GUI"));
