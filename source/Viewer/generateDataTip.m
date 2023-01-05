@@ -29,7 +29,7 @@ function dt = generateDataTip(ax, xClicked)
     else
         plot(ax, x, y, "*", "MarkerSize", 8, 'HandleVisibility','off', 'Tag', 'TempDataTipMarker', 'LineWidth', 2, "Color", axLine.Color);
         output_txt = sprintf("%.3f\n%.3f", x, y);
-        dt = text(ax, x, y, output_txt, 'Color', "black",'FontSize',14);
+        dt = text(ax, x, y, output_txt, 'Color', "black",'FontSize',14, 'Tag', 'TempDataTipMarker');
     end
     
     clear cleanup % return hold state

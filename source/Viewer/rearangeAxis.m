@@ -29,6 +29,7 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         set(ax, 'YAxisLocation', 'right');
         set(ax, 'PickableParts', 'all');
         set(ax, 'ButtonDownFcn', {@myAxesCallback});
+        set(fig, 'KeyReleaseFcn', {@keyReleasedCb});
         
         set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]);
         for i = 1: numel(tsArr)
@@ -68,7 +69,32 @@ end
 
 % The clicked axis is set to be active
 function myAxesCallback(src,eventdata)
-    %uistack(src, 'top');
+    
+    tmp = eventdata
+    src
+
+end
+
+
+function keyReleasedCb(src,eventdata)
+    keyPressed = eventdata.Key;
+    if strcmpi(keyPressed,'c')
+        figOrg = ancestor(src,'figure');
+        cah = findall(figOrg,'type','axes');
+        for i = 1: numel(cah)
+            ax = cah(i);
+            for j = numel(ax.Children):-1:1
+               if(strcmp(ax.Children(j).Tag, 'TempDataTipMarker'))
+                   delete(ax.Children(j));
+               end
+            end
+        end
+        disp("Cleared DataTip");
+    elseif strcmpi(keyPressed,'d')
+        disp("Pressed D");
+    end
+    
+
 end
 
 
