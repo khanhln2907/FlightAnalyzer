@@ -2,6 +2,16 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         % Pre
         fig = figure();
         
+        set(fig,'defaultAxesCreateFcn',@axDefaultCreateFcn);
+        
+%         panel1 = uipanel('Parent',fig);
+%         panel2 = uipanel('Parent',panel1);
+%         set(panel1,'Position',[0 0 0.95 1]);
+%         set(panel2,'Position',[0 -1 1 2]);
+%         s = uicontrol('Style','Slider','Parent',1,...
+%           'Units','normalized','Position',[0.95 0 0.05 1],...
+%           'Value',1,'Callback',{@slider_callback1,panel2});
+      
         % Initialized the axes accordingly
         ax(1) = axes('Parent', fig);
         for i = 2:numel(tsArr)
@@ -18,13 +28,16 @@ function out = rearangeAxis(tsArr, tMin, tMax)
            line(i) = plot(ax(i), ts.Time(tFilter), ts.Value(tFilter), '-o', 'Color', axColors(i,:), "DisplayName", ts.Info.getLegendName);  
            xlim([tMin - tOffset tMax + tOffset]);
            axis manual
-
            if(i  == 1)
               hold on; 
            end
         end
         
         % Readjust the axes for readability + beautifulize
+        for i = 1:numel(ax)
+           tb = axtoolbar(ax(i),{'pan'}); % TODO: Check version matlab here
+           disableDefaultInteractivity(ax(i));
+        end
         set(ax,'Color', 'None', 'Box', 'off');
         set(ax, 'YAxisLocation', 'right');
         set(ax, 'PickableParts', 'all');
@@ -53,7 +66,50 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
         
         
+%         p = pan(fig);
+%         p.ActionPreCallback = @myprecallback;
+%         p.ActionPostCallback = @mypostcallback;
+%         p.Enable = 'on';
+        
+        %Create a zoom handle and define the post-callback process
+        out.zhndl = zoom; 
+        %set(out.zhndl, 'ActionPreCallback',  @zoomPreCb);
+        set(out.zhndl, 'ActionPostCallback',  @zoomPostCb);
+        %Post-callback function  
+
+
+        
         out.line = line;
+end
+
+function axDefaultCreateFcn(hAxes, ~)
+    try
+        hAxes.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
+        hAxes.Toolbar = [];
+    catch
+        disp("Shit")
+        % ignore - old Matlab release
+    end
+end
+
+function zoomPreCb(h, eventdata)  
+        disp('zoomPreCb is about to occur.');
+        disp(eventdata)
+end
+
+function zoomPostCb(h, eventdata)
+    disp('zoomPostCb is about to occur.');
+    disp(eventdata)
+end
+
+function mypostcallback(obj,evd)
+    newLim = evd.Axes.XLim;
+    disp(sprintf('The new X-Limits are [%.2f,%.2f].',newLim));
+end
+
+function slider_callback1(src,eventdata,arg1)
+val = get(src,'Value');
+set(arg1,'Position',[0 -val 1 2])
 end
 
 % Interactive Cursor Line
@@ -78,9 +134,10 @@ end
 
 function keyReleasedCb(src,eventdata)
     keyPressed = eventdata.Key;
+    figOrg = ancestor(src,'figure');   
+    cah = findall(figOrg,'type','axes');
+    
     if strcmpi(keyPressed,'c')
-        figOrg = ancestor(src,'figure');
-        cah = findall(figOrg,'type','axes');
         for i = 1: numel(cah)
             ax = cah(i);
             for j = numel(ax.Children):-1:1
@@ -90,6 +147,13 @@ function keyReleasedCb(src,eventdata)
             end
         end
         disp("Cleared DataTip");
+        zoom reset;
+    elseif strcmpi(keyPressed,'z')
+        for i = 1: numel(cah)
+            cah(i);
+            zoom(2.0);            
+        end
+        disp("Zoomed in");
     elseif strcmpi(keyPressed,'d')
         disp("Pressed D");
     end
