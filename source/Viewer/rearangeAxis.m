@@ -35,8 +35,8 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         
         % Readjust the axes for readability + beautifulize
         for i = 1:numel(ax)
-           tb = axtoolbar(ax(i),{'pan'}); % TODO: Check version matlab here
-           disableDefaultInteractivity(ax(i));
+           %tb = axtoolbar(ax(i),{'pan', 'zoomin', 'zoomout','reset'}); % TODO: Check version matlab here
+           %disableDefaultInteractivity(ax(i));
         end
         set(ax,'Color', 'None', 'Box', 'off');
         set(ax, 'YAxisLocation', 'right');
@@ -75,31 +75,74 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         out.zhndl = zoom; 
         %set(out.zhndl, 'ActionPreCallback',  @zoomPreCb);
         set(out.zhndl, 'ActionPostCallback',  @zoomPostCb);
+        out.zhndl.Enable = 'off';
+
         %Post-callback function  
+    
+%         for i = 1: numel(ax)
+%            addlistener(ax, 'XLim', 'PostSet', @xlimCb); 
+%         end
+%         
 
-
+        % Get the toolbar axes
+        axToolstrip = axtoolbar(ax(1), 'default');
+        % Get the restore view button and reset the callback function
+        isRestoreButton = strcmpi({axToolstrip.Children.Icon}, 'restoreview');
+        restoreButtonHandle = axToolstrip.Children(isRestoreButton);
+        restoreButtonHandle.ButtonPushedFcn = @(~,ev) restoreViewCallback(objH, evt);
         
+
         out.line = line;
+end
+
+function xlimCb(ObjH, EventData)  % OK
+    disp("Hey")
+
 end
 
 function axDefaultCreateFcn(hAxes, ~)
     try
-        hAxes.Interactions = [zoomInteraction regionZoomInteraction rulerPanInteraction];
-        hAxes.Toolbar = [];
+        %hAxes.Interactions = [];
+        %hAxes.Toolbar = [];
     catch
-        disp("Shit")
+        disp("axDefaultCreateFcn failed due to old MATLAB release")
         % ignore - old Matlab release
     end
 end
+
+function restoreViewCallback(hAxes, ~)
+    try
+        disp("RestoredView")
+    
+    catch
+        disp("axDefaultCreateFcn failed due to old MATLAB release")
+        % ignore - old Matlab release
+    end
+end
+
+
 
 function zoomPreCb(h, eventdata)  
         disp('zoomPreCb is about to occur.');
         disp(eventdata)
 end
 
-function zoomPostCb(h, eventdata)
+function zoomPostCb(figH, eventdata)
     disp('zoomPostCb is about to occur.');
     disp(eventdata)
+    
+    cah = findall(figH,'type','axes');
+    
+    
+    ax = eventdata.Axes;
+    xBnd = ax.XLim;
+    
+    for i = 1:numel(ax)
+        set(ax(i),'XLim',xBnd);
+    end
+    
+    
+    
 end
 
 function mypostcallback(obj,evd)
@@ -138,14 +181,30 @@ function keyReleasedCb(src,eventdata)
     cah = findall(figOrg,'type','axes');
     
     if strcmpi(keyPressed,'c')
-        for i = 1: numel(cah)
-            ax = cah(i);
-            for j = numel(ax.Children):-1:1
-               if(strcmp(ax.Children(j).Tag, 'TempDataTipMarker'))
-                   delete(ax.Children(j));
-               end
+        try
+            % Delate DataTip as Childrens of axes
+            for i = 1: numel(cah)
+                ax = cah(i);
+                for j = numel(ax.Children):-1:1
+                   if(strcmp(ax.Children(j).Tag, 'TempDataTipMarker'))
+                       delete(ax.Children(j));
+                   end
+                end
             end
+        catch
+            
         end
+            
+        try    
+            % Delate DataTip found from figures
+            dt = findall(figOrg,'type','DataTip');
+            for i = numel(dt):-1:1
+                delete(dt(i));
+            end
+        catch
+            
+        end
+        
         disp("Cleared DataTip");
         zoom reset;
     elseif strcmpi(keyPressed,'z')
@@ -154,6 +213,13 @@ function keyReleasedCb(src,eventdata)
             zoom(2.0);            
         end
         disp("Zoomed in");
+    
+    elseif strcmpi(keyPressed,'r')
+        disp("Pressed Reset");        
+        for i = 1: numel(cah)
+            resetplotview(cah(i),'InitializeCurrentView');         
+        end
+        
     elseif strcmpi(keyPressed,'d')
         disp("Pressed D");
     end
