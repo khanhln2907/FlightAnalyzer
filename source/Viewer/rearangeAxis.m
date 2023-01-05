@@ -1,8 +1,7 @@
 function out = rearangeAxis(tsArr, tMin, tMax)
         % Pre
-        fig = figure('KeyReleaseFcn', {@figKeyReleaseFcn});
+        fig = figure();
         
-
         % Initialized the axes accordingly
         ax(1) = axes('Parent', fig);
         for i = 2:numel(tsArr)
@@ -46,24 +45,25 @@ function out = rearangeAxis(tsArr, tMin, tMax)
            ax(i).YTickLabel = strcat({blanks((i-1)*axOffset)}, ax(i).YTickLabel); 
         end
         
-        set(line, "ButtonDownFcn", {@lineButtonDownFcn});
+        %set(line, "ButtonDownFcn", {@lineButtonDownFcn});
         
         cursorLine = xline(0,'HitTest','on', 'Parent', ax(end), "LineWidth", 2, "LineStyle", "-.");
-        fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);
+        fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);       
         cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
-
+        
         
         out.line = line;
 end
 
 % Interactive Cursor Line
 function WBMF(this,evnt,ax,ph)
-    ph.Value = ax(1).CurrentPoint(1,1);
+    ph.Value = ax(end).CurrentPoint(1,1);
 end
 
 function BDF(this,evnt,ax,ph)
-    fprintf('clicked at x position: %.2f\n',ax(3).CurrentPoint(1,1))
-    triggerDatatip(this, ax(3).CurrentPoint(1,1));
+    fprintf('clicked at x position: %.2f\n',ax(end).CurrentPoint(1,1))
+    triggerDatatip(this, ax(end).CurrentPoint(1,1));
+
 end
 
 % The clicked axis is set to be active
@@ -71,51 +71,17 @@ function myAxesCallback(src,eventdata)
     %uistack(src, 'top');
 end
 
-function figKeyReleaseFcn(src, KeyData)
-    %disp(KeyData.Character);
-    %cah = findall(src,'type','axes');
-    %src.Children = [src.Children(end); src.Children(1:end-1)];
-end
-
-function lineButtonDownFcn(lineSrc, hit)
-    % datatip() requires Matlab r2019b or later
-    % Find closet vertices to mouse click
-    hitPoint = hit.IntersectionPoint;
-    triggerDatatip(lineSrc, hitPoint(1));
-end
 
 %% Helper function
-function triggerDatatip(lineSrc, selX)
+function triggerDatatip(lineSrc, xClicked)
     % Get all children of figure 
     figOrg = ancestor(lineSrc,'figure');
     cah = findall(figOrg,'type','axes');
-    
+        
     for i = 1: numel(cah)
         % store original hold state and return at the end
         ax = cah(i);
-        axLine =  findall(ax,'type','line', 'tag', '');
-        [~, minDistIdx] = min((axLine.XData - selX).^2);
-
-        holdStates = ["off","on"];
-        holdstate = ishold(ax);
-        cleanup = onCleanup(@()hold(holdStates(holdstate+1)));
-        hold(ax,'on')
-        % Search for and destroy previously existing datatips
-        % produced by this callback fuction.
-        %preexisting = findobj(ax,'Tag','TempDataTipMarker');
-        %delete(preexisting)
-        
-        % Plot temp point at click location and add basic datatip
-        x = axLine.XData(minDistIdx);
-        y = axLine.YData(minDistIdx);
-        
-        hh=plot(ax,x, y,'k.','Tag','TempDataTipMarker', 'HandleVisibility','off', "DisplayName", "None");
-        dt = datatip(hh, x, y,'Tag','TempDataTipMarker');
-        dt.DeleteFcn = @(~,~)delete(hh);
-        clear cleanup % return hold state
-        
-        % Update datatip
-        hh.DataTipTemplate.DataTipRows(end+1) = ax.YLabel.String;
+        dt = generateDataTip(ax, xClicked);        
     end
 end
 
