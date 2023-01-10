@@ -1,5 +1,4 @@
-addpath(genpath("source"));
-addpath(genpath("scripts"));
-addpath(genpath("Packages"));
+addpath(genpath("packages"));
 addpath(genpath("GUI"));
-addpath(genpath("source"));
+
+
