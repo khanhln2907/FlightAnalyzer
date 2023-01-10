@@ -1,8 +1,13 @@
 function out = rearangeAxis(tsArr, tMin, tMax)
         % Pre
-        fig = figure();
+        figH = figure();
         
-        set(fig,'defaultAxesCreateFcn',@axDefaultCreateFcn);
+        
+        %out.c(1) = uicontrol('style','checkbox','units','pixels',...
+        %        'position',[10,30,50,15],'string','yes');
+
+        
+        set(figH,'defaultAxesCreateFcn',@axDefaultCreateFcn);
         
 %         panel1 = uipanel('Parent',fig);
 %         panel2 = uipanel('Parent',panel1);
@@ -13,9 +18,9 @@ function out = rearangeAxis(tsArr, tMin, tMax)
 %           'Value',1,'Callback',{@slider_callback1,panel2});
       
         % Initialized the axes accordingly
-        ax(1) = axes('Parent', fig);
-        for i = 2:numel(tsArr)+1
-           ax(i) = copyobj(ax(1), fig);
+        ax(1) = axes('Parent', figH);
+        for i = 2:numel(tsArr)
+           ax(i) = copyobj(ax(1), figH);
         end
         set(ax(end),'Visible', 'off', 'Box', 'off', 'Tag', 'DummyAxes');
 
@@ -36,15 +41,11 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         end
         
         % Readjust the axes for readability + beautifulize
-        for i = 1:numel(ax)
-           %tb = axtoolbar(ax(i),{'pan', 'zoomin', 'zoomout','reset'}); % TODO: Check version matlab here
-           %disableDefaultInteractivity(ax(i));
-        end
         set(ax,'Color', 'None', 'Box', 'off');
         set(ax, 'YAxisLocation', 'right');
         set(ax, 'PickableParts', 'all');
         set(ax, 'ButtonDownFcn', {@myAxesCallback});
-        set(fig, 'KeyReleaseFcn', {@keyReleasedCb});
+        set(figH, 'KeyReleaseFcn', {@keyReleasedCb});
         
         set(ax, 'Position', ax(1).Position .* [1 1 0.7 1]);
         for i = 1: numel(tsArr)
@@ -57,7 +58,7 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         
         axOffset = 15;
         for i = 2: numel(tsArr)
-           ax(i).YTick = linspace(min(ax(i).YTick),max(ax(i).YTick),numel(ax(numel(i)).YTick)); 
+           %ax(i).YTick = linspace(min(ax(i).YTick),max(ax(i).YTick),numel(ax(numel(i)).YTick)); 
            ax(i).YTickLabel = strcat({blanks((i-1)*axOffset)}, ax(i).YTickLabel); 
         end
         
@@ -66,9 +67,9 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         
         %set(line, "ButtonDownFcn", {@lineButtonDownFcn});
         
-        cursorLine = xline(0,'HitTest','on', 'Parent', ax(1), "LineWidth", 1, "LineStyle", "-.");
-        fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);       
-        cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
+        %cursorLine = xline(0,'HitTest','on', 'Parent', ax(2), "LineWidth", 1, "LineStyle", "-.");
+        %fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);       
+        %cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
         
         
 %         p = pan(fig);
@@ -94,23 +95,22 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         % Get the restore view button and reset the callback function
         isRestoreButton = strcmpi({axToolstrip.Children.Icon}, 'restoreview');
         restoreButtonHandle = axToolstrip.Children(isRestoreButton);
-        restoreButtonHandle.ButtonPushedFcn = @(~,ev) restoreViewCallback(fig, ev);
+        restoreButtonHandle.ButtonPushedFcn = @(~,ev) restoreViewCallback(figH, ev);
         
 
         out.line = line;
+        
+        legend;
+        out.figH = figH;
 end
 
-function xlimCb(ObjH, EventData)  % OK
-    disp("Hey")
-
-end
 
 function axDefaultCreateFcn(hAxes, ~)
     try
         %hAxes.Interactions = [];
         %hAxes.Toolbar = [];
     catch
-        disp("axDefaultCreateFcn failed due to old MATLAB release")
+        %disp("axDefaultCreateFcn failed due to old MATLAB release")
         % ignore - old Matlab release
     end
 end
@@ -125,16 +125,9 @@ function restoreViewCallback(hAxes, ~)
     end
 end
 
-
-
-function zoomPreCb(h, eventdata)  
-        disp('zoomPreCb is about to occur.');
-        disp(eventdata)
-end
-
 function zoomPostCb(figH, evt)
-    disp('zoomPostCb is about to occur.');
-    disp(evt)
+    %disp('zoomPostCb is about to occur.');
+    %disp(evt)
     
     cah = findall(figH,'type','axes');
     
@@ -215,12 +208,14 @@ function keyReleasedCb(src,eventdata)
         try
             set(figOrg.Children(1),'XMinorGrid','off');
             set(figOrg.Children(1),'YMinorGrid','off');
+            figOrg.Children = figOrg.Children([end 1:end-1]);
         catch
             
         end
         
-            figOrg.Children= figOrg.Children([end 1:end-1]);
-            
+        while(~strcmp(figOrg.Children(1).Type, "axes"))
+            figOrg.Children = figOrg.Children([end 1:end-1]);
+        end
         
         try
             set(figOrg.Children(1),'XMinorGrid','on');
