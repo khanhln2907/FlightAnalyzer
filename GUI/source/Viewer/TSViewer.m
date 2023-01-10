@@ -54,7 +54,7 @@ classdef TSViewer < handle
             legend(out.line, obj.legendName, "Interpreter", "None", 'Position',[0.05 0.90 0.02 0.01]);
 
             % Post plotting
-            FormatFigure(gcf, 8, 4/3, 'MarkerSize', 3);
+             FormatFigure(gcf, 12, 4/3, 'MarkerSize', 3);
         end
         
         

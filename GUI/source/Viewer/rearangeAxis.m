@@ -14,14 +14,16 @@ function out = rearangeAxis(tsArr, tMin, tMax)
       
         % Initialized the axes accordingly
         ax(1) = axes('Parent', fig);
-        for i = 2:numel(tsArr)
+        for i = 2:numel(tsArr)+1
            ax(i) = copyobj(ax(1), fig);
         end
-        linkaxes(ax,'x');
+        set(ax(end),'Visible', 'off', 'Box', 'off', 'Tag', 'DummyAxes');
+
+        
         axColors = ColorTable.colormat;
         
         % Plot them and color according to the color table
-        tOffset = 0; %(tMax - tMin) * 0.1;
+        tOffset = (tMax - tMin) * 0.1;
         for i = 1:numel(tsArr)
            ts = tsArr{i};
            tFilter =  (ts.Time <= tMax) & (ts.Time >= tMin);
@@ -44,7 +46,7 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         set(ax, 'ButtonDownFcn', {@myAxesCallback});
         set(fig, 'KeyReleaseFcn', {@keyReleasedCb});
         
-        set(ax, 'Position', ax(1).Position .* [1 1 (10-numel(tsArr))/10 1]);
+        set(ax, 'Position', ax(1).Position .* [1 1 0.7 1]);
         for i = 1: numel(tsArr)
             ax(i).YAxis.Color = axColors(i,:);
             ylim(ax(i), ylim(ax(i))); 
@@ -59,9 +61,12 @@ function out = rearangeAxis(tsArr, tMin, tMax)
            ax(i).YTickLabel = strcat({blanks((i-1)*axOffset)}, ax(i).YTickLabel); 
         end
         
+        linkaxes(ax, 'x');
+
+        
         %set(line, "ButtonDownFcn", {@lineButtonDownFcn});
         
-        cursorLine = xline(0,'HitTest','on', 'Parent', ax(end), "LineWidth", 2, "LineStyle", "-.");
+        cursorLine = xline(0,'HitTest','on', 'Parent', ax(1), "LineWidth", 1, "LineStyle", "-.");
         fig.WindowButtonMotionFcn = @(o,e)WBMF(o,e,ax,cursorLine);       
         cursorLine.ButtonDownFcn = @(o,e)BDF(o,e,ax,cursorLine);
         
@@ -89,7 +94,7 @@ function out = rearangeAxis(tsArr, tMin, tMax)
         % Get the restore view button and reset the callback function
         isRestoreButton = strcmpi({axToolstrip.Children.Icon}, 'restoreview');
         restoreButtonHandle = axToolstrip.Children(isRestoreButton);
-        restoreButtonHandle.ButtonPushedFcn = @(~,ev) restoreViewCallback(objH, evt);
+        restoreButtonHandle.ButtonPushedFcn = @(~,ev) restoreViewCallback(fig, ev);
         
 
         out.line = line;
@@ -127,32 +132,23 @@ function zoomPreCb(h, eventdata)
         disp(eventdata)
 end
 
-function zoomPostCb(figH, eventdata)
+function zoomPostCb(figH, evt)
     disp('zoomPostCb is about to occur.');
-    disp(eventdata)
+    disp(evt)
     
     cah = findall(figH,'type','axes');
     
     
-    ax = eventdata.Axes;
+    ax = evt.Axes;
     xBnd = ax.XLim;
+    yBnd = ax.YLim;
     
-    for i = 1:numel(ax)
-        set(ax(i),'XLim',xBnd);
+    for i = 1:numel(cah)
+        if(~strcmp(cah(i).Tag, 'DummyAxes'))
+            set(cah(i),'XLim',xBnd);
+        end
     end
     
-    
-    
-end
-
-function mypostcallback(obj,evd)
-    newLim = evd.Axes.XLim;
-    disp(sprintf('The new X-Limits are [%.2f,%.2f].',newLim));
-end
-
-function slider_callback1(src,eventdata,arg1)
-val = get(src,'Value');
-set(arg1,'Position',[0 -val 1 2])
 end
 
 % Interactive Cursor Line
@@ -214,16 +210,39 @@ function keyReleasedCb(src,eventdata)
         end
         disp("Zoomed in");
     
-    elseif strcmpi(keyPressed,'r')
+    elseif strcmpi(keyPressed,'n')
         disp("Pressed Reset");        
-        for i = 1: numel(cah)
-            resetplotview(cah(i),'InitializeCurrentView');         
+        try
+            set(figOrg.Children(1),'XMinorGrid','off');
+            set(figOrg.Children(1),'YMinorGrid','off');
+        catch
+            
         end
+        
+            figOrg.Children= figOrg.Children([end 1:end-1]);
+            
+        
+        try
+            set(figOrg.Children(1),'XMinorGrid','on');
+            set(figOrg.Children(1),'YMinorGrid','on');
+        catch
+            
+        end
+        
+        
+    elseif strcmpi(keyPressed,'b')
+        disp("Pressed Reset");        
+        figOrg.Children= figOrg.Children([end 1:end-1]);
+
         
     elseif strcmpi(keyPressed,'d')
         disp("Pressed D");
     end
     
+    
+    
+
+
 
 end
 
@@ -235,9 +254,9 @@ function triggerDatatip(lineSrc, xClicked)
     cah = findall(figOrg,'type','axes');
         
     for i = 1: numel(cah)
-        % store original hold state and return at the end
-        ax = cah(i);
-        dt = generateDataTip(ax, xClicked);        
+        if(~strcmp(cah(i).Tag, 'DummyAxes'))
+            dt = generateDataTip(cah(i), xClicked);        
+        end
     end
 end
 
